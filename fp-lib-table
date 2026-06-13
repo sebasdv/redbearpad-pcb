@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "redbearpad")(type "KiCad")(uri "${KIPRJMOD}/libs/redbearpad.pretty")(options "")(descr "Footprints locales RedBearPad"))
+)

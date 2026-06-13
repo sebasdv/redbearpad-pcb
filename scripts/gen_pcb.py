@@ -1,6 +1,7 @@
 """Genera redbearpad.kicad_pcb desde el netlist + tabla de placement del spec.
 Ejecutar con el python de KiCad (tiene el modulo pcbnew).
 """
+import math
 import os, re, sys
 import pcbnew
 
@@ -156,20 +157,52 @@ for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
     z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
     board.Add(z)
 
+# ---------- keepouts: la zona no debe acercarse a los agujeros NPTH ----------
+def npth_keepout(cx, cy, r, segs=32):
+    z = pcbnew.ZONE(board)
+    z.SetIsRuleArea(True)
+    z.SetDoNotAllowCopperPour(True)
+    z.SetDoNotAllowTracks(False)
+    z.SetDoNotAllowVias(False)
+    z.SetDoNotAllowPads(False)
+    z.SetDoNotAllowFootprints(False)
+    lset = pcbnew.LSET()
+    lset.AddLayer(pcbnew.F_Cu)
+    lset.AddLayer(pcbnew.B_Cu)
+    z.SetLayerSet(lset)
+    o = z.Outline()
+    o.NewOutline()
+    for i in range(segs):
+        a = 2 * math.pi * i / segs
+        o.Append(FMM(cx + r * math.cos(a)), FMM(cy + r * math.sin(a)))
+    board.Add(z)
+
+for ref, (_, x, y, _) in PLACE.items():
+    if ref.startswith("SW"):
+        npth_keepout(x, y, 2.6)          # agujero central 4.4 mm
+    elif ref.startswith("H"):
+        npth_keepout(x, y, 1.95)         # agujero de montaje 3.1 mm
+
 # ---------- pistas ----------
 TRACKS = [
     # (net, capa, ancho_mm, [(x, y), ...])
-    ("SW1", pcbnew.F_Cu, 0.25, [(19.8, 19.8), (30, 30), (38.5, 32.15), (40.38, 32.147)]),
+    # NW: SW1/SW2 entran a J1 por la izquierda; SDA F.Cu y SCL B.Cu.
+    ("SW1", pcbnew.F_Cu, 0.25, [(19.8, 19.8), (28, 27), (36, 30.5), (38.5, 32.147), (40.38, 32.147)]),
     ("SW2", pcbnew.F_Cu, 0.25, [(35.8, 35.8), (39.2, 34.69), (40.38, 34.687)]),
-    ("SW3", pcbnew.F_Cu, 0.25, [(19.8, 51.8), (19.8, 58), (57.5, 58), (57.5, 36.6), (55.62, 34.687)]),
-    ("SW4", pcbnew.F_Cu, 0.25, [(35.8, 51.8), (43, 46), (43, 38), (53.5, 33.5), (55.62, 32.147)]),
-    ("SW5", pcbnew.F_Cu, 0.25, [(51.8, 51.8), (58.5, 45), (58.5, 30.5), (55.62, 29.607)]),
-    ("SW6", pcbnew.F_Cu, 0.25, [(67.8, 35.8), (62, 29), (57.5, 27.5), (55.62, 27.067)]),
-    ("SW7", pcbnew.F_Cu, 0.25, [(83.8, 35.8), (70, 23), (57.5, 21.99), (55.62, 21.987)]),
-    ("SW8", pcbnew.F_Cu, 0.25, [(83.8, 51.8), (75, 40), (62, 19.45), (55.62, 19.447)]),
-    ("SDA", pcbnew.F_Cu, 0.25, [(30, 17.32), (36, 22), (38.5, 27.07), (40.38, 27.067)]),
-    ("SCL", pcbnew.B_Cu, 0.25, [(30, 14.78), (34, 20), (38, 29.61), (40.38, 29.607)]),
-    ("+3V3", pcbnew.F_Cu, 0.5, [(30, 12.24), (27.5, 14), (27.5, 36.5), (58.5, 36.5), (58.5, 4.21), (55.62, 4.207)]),
+    # Flanco oeste de J2 (peine: pad mas bajo = corredor mas interno):
+    # SW3 -> J2.14 por x=54.3, SW4 -> J2.13 por x=53.5, SW5 -> J2.12 por x=52.7.
+    ("SW3", pcbnew.F_Cu, 0.25, [(19.8, 51.8), (23, 56.2), (54.3, 56.2), (54.3, 34.687), (55.62, 34.687)]),
+    ("SW4", pcbnew.F_Cu, 0.25, [(35.8, 51.8), (45.9, 51.15), (53.5, 54.95), (53.5, 32.147), (55.62, 32.147)]),
+    ("SW5", pcbnew.F_Cu, 0.25, [(51.8, 51.8), (52.7, 48), (52.7, 31), (55.62, 29.607)]),
+    # Flanco este de J2 (peine: pad mas bajo = corredor mas interno):
+    # SW6 -> J2.11 por x=57.5, SW7 -> J2.9 por x=58.3, SW8 -> J2.8 por x=59.1.
+    ("SW6", pcbnew.F_Cu, 0.25, [(67.8, 35.8), (70.5, 33), (70.5, 29.2), (57.5, 29.2), (57.5, 27.067), (55.62, 27.067)]),
+    ("SW7", pcbnew.F_Cu, 0.25, [(83.8, 35.8), (83.8, 28), (58.3, 28), (58.3, 21.987), (55.62, 21.987)]),
+    ("SW8", pcbnew.F_Cu, 0.25, [(83.8, 51.8), (88, 48), (88, 24), (59.1, 24), (59.1, 19.447), (55.62, 19.447)]),
+    ("SDA", pcbnew.F_Cu, 0.25, [(30, 17.32), (36, 22), (38.5, 27.067), (40.38, 27.067)]),
+    ("SCL", pcbnew.B_Cu, 0.25, [(30, 14.78), (34, 20), (38, 29.607), (40.38, 29.607)]),
+    # +3V3 entera en B.Cu: rodea por el sur (y=40.6) y sube por x=58.5 hasta J2.2.
+    ("+3V3", pcbnew.B_Cu, 0.5, [(30, 12.24), (27.5, 14.5), (27.5, 40.6), (58.5, 40.6), (58.5, 4.207), (55.62, 4.207)]),
 ]
 for net, layer, width, pts in TRACKS:
     for a, b in zip(pts, pts[1:]):
@@ -191,9 +224,14 @@ def silk(textstr, x, y, layer=pcbnew.F_SilkS, size=1.2, mirror=False):
     board.Add(t)
 
 silk("REDBEARPAD", 75, 8, size=2.0)
+# Etiquetas centradas encima del marco serigrafico de cada switch (el marco
+# llega hasta centro-7.1). SW4/SW8 se corren para no pisar el pad GND del
+# switch vecino de arriba (SW2/SW7 pad2 en y=38.5).
+SILK_SW = {"SW4": (35.0, 40.0), "SW8": (76.5, 40.0)}
 for ref, (_, x, y, _) in PLACE.items():
     if ref.startswith("SW"):
-        silk(ref, x - 6.5, y - 6.5, size=1.0)
+        lx, ly = SILK_SW.get(ref, (x, y - 8.2))
+        silk(ref, lx, ly, size=1.0)
 for lbl, py in (("GND", 9.7), ("VCC", 12.24), ("SCL", 14.78), ("SDA", 17.32)):
     silk(lbl, 26.0, py, size=0.9)
 

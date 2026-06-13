@@ -2,7 +2,7 @@
 Ejecutar con el python de KiCad (tiene el modulo pcbnew).
 """
 import math
-import os, re, sys
+import os, re
 import pcbnew
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -10,6 +10,8 @@ ROOT = os.path.normpath(os.path.join(HERE, ".."))
 PCB = os.path.join(ROOT, "redbearpad.kicad_pcb")
 NETFILE = os.path.join(ROOT, "redbearpad.net")
 LOCAL_LIB = os.path.join(ROOT, "libs", "redbearpad.pretty")
+# Ruta de los footprints estandar de KiCad. Ajustar segun instalacion local
+# si se mueve a otra maquina o cambia la version (p.ej. 9.0 -> 9.1).
 KICAD_FP = r"C:\Users\sebastian.duarte\AppData\Local\Programs\KiCad\9.0\share\kicad\footprints"
 
 def MM(x, y):
@@ -19,6 +21,10 @@ def FMM(v):
     return int(round(v * 1e6))
 
 # ---------- parsear netlist ----------
+# El parser asume el orden (ref ...)(pin ...) del exportador de netlist de
+# KiCad 9. Si una version futura reordena las subclaves del nodo, la regex
+# dejaria de coincidir y se perderian conexiones (sin error visible): revisar
+# aqui si tras un upgrade de KiCad aparecen nets sin rutear.
 def balanced(text, start):
     depth = 0
     j = start

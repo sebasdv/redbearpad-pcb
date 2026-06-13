@@ -10,8 +10,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.normpath(os.path.join(HERE, "..", "redbearpad.kicad_sch"))
 ROOT_UUID = "f0a11111-2222-3333-4444-555566667777"
 
+NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, "redbearpad-gamepad-pcb")
+_uuid_counter = 0
+
 def U():
-    return str(uuid.uuid4())
+    global _uuid_counter
+    _uuid_counter += 1
+    return str(uuid.uuid5(NAMESPACE, str(_uuid_counter)))
 
 def balanced(text, start):
     depth = 0
@@ -97,6 +102,9 @@ def place_conn(ref, value, fp, lib_id, pins, nets, x, y):
             body.append(no_connect(gx, gy))
         else:
             body.append(glabel(net, gx, gy, left=px < 0))
+
+# Reset counter for deterministic UUID generation
+_uuid_counter = 0
 
 for k in range(8):
     ref = "SW%d" % (k + 1)

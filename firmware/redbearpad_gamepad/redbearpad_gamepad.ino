@@ -6,8 +6,8 @@
  * "Configurar controladores de juego USB"). La OLED muestra en vivo que
  * boton esta pulsado, util para validar PCB, switches y pantalla.
  *
- * Librerias necesarias (Gestor de librerias / GitHub):
- *   - Joystick  (Matthew Heironimus, ArduinoJoystickLibrary)
+ * Librerias necesarias (todas desde el Gestor de librerias de Arduino):
+ *   - HID-Project      (NicoHood) -> provee el Gamepad USB HID
  *   - Adafruit SSD1306
  *   - Adafruit GFX Library
  *
@@ -16,7 +16,7 @@
  *   OLED I2C: SDA->D2  SCL->D3   (3.3 V)
  */
 
-#include <Joystick.h>
+#include <HID-Project.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -32,14 +32,8 @@ const uint8_t PIN_BOTON[NUM_BOTONES] = { 5, 8, 9, 10, 11, 12, A0, A1 };
 #define OLED_ADDR    0x3C    // direccion tipica de los modulos 128x32
 Adafruit_SSD1306 oled(OLED_ANCHO, OLED_ALTO, &Wire, OLED_RESET);
 
-// ----- Gamepad HID: 8 botones, sin ejes ni hat -----
-Joystick_ Joystick(
-  JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD,
-  NUM_BOTONES, 0,        // botones, hat switches
-  false, false, false,   // ejes X, Y, Z
-  false, false, false,   // ejes Rx, Ry, Rz
-  false, false,          // rudder, throttle
-  false, false, false);  // accelerator, brake, steering
+// El gamepad HID lo provee HID-Project mediante el objeto global `Gamepad`.
+// Sus botones se numeran 1..32, por eso usamos (i + 1) al pulsar/soltar.
 
 // Estado previo de cada boton para enviar al PC solo en los cambios (con debounce).
 bool estadoPrev[NUM_BOTONES];
@@ -81,7 +75,7 @@ void setup() {
     ultimoCambio[i] = 0;
   }
 
-  Joystick.begin();                 // arranca el HID
+  Gamepad.begin();                  // arranca el HID
 
   // La pantalla es opcional para el test: si falla, el gamepad sigue funcionando.
   oledOk = oled.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
@@ -98,6 +92,7 @@ void setup() {
 void loop() {
   bool pulsadoAhora[NUM_BOTONES];
   uint32_t ahora = millis();
+  bool huboCambio = false;
 
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     // INPUT_PULLUP: pin en LOW = boton pulsado.
@@ -108,9 +103,14 @@ void loop() {
       estadoPrev[i] = leido;
       ultimoCambio[i] = ahora;
       pulsadoAhora[i] = leido;
-      Joystick.setButton(i, leido ? 1 : 0);
+      // HID-Project numera los botones desde 1.
+      if (leido) Gamepad.press(i + 1);
+      else       Gamepad.release(i + 1);
+      huboCambio = true;
     }
   }
+
+  if (huboCambio) Gamepad.write();   // envia el reporte HID solo si cambio algo
 
   dibujarPantalla(pulsadoAhora);
 }

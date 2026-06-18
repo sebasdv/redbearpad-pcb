@@ -8,21 +8,23 @@ Sirve para validar PCB, switches y pantalla, y para usar el control en juegos.
 
 1. **Core del Blend Micro** `redbearlab:avr` (repo `blend-micro-boards`).
    Comprobar: `arduino-cli core list` debe listar `redbearlab:avr`.
-2. **Librerías:**
-   - **Joystick** — Matthew Heironimus, *ArduinoJoystickLibrary*
-     (https://github.com/MHeironimus/ArduinoJoystickLibrary). No está en el
-     Gestor de librerías: instalar desde el ZIP de GitHub
-     (IDE: *Programa → Incluir librería → Añadir biblioteca .ZIP*).
-   - **Adafruit SSD1306** y **Adafruit GFX Library** (Gestor de librerías).
+2. **Librerías** (todas desde el Gestor de librerías de Arduino):
+   - **HID-Project** — NicoHood. Provee el `Gamepad` USB HID. Se usa esta y no
+     la librería "Joystick" porque hay dos "Joystick" distintas que comparten el
+     header `Joystick.h` (la de Heironimus emula un gamepad; la de Giuseppe
+     Martini lee joysticks analógicos) y colisionan. `HID-Project.h` no choca
+     con nada.
+   - **Adafruit SSD1306** y **Adafruit GFX Library**.
 
 ## Compilar
 
-Verificado en esta máquina con arduino-cli (20586 B flash / 71 %, 718 B RAM):
+Verificado en esta máquina con arduino-cli (18446 B flash / 64 %, 609 B RAM),
+usando solo librerías del Gestor (sin rutas extra):
 
 ```powershell
 $cli = "C:\redbearpad\tools\arduino-cli\arduino-cli.exe"
-# --libraries apunta a la carpeta donde extrajiste ArduinoJoystickLibrary
-& $cli compile --fqbn redbearlab:avr:blendmicro16 --libraries <carpeta_libs> firmware\redbearpad_gamepad
+& $cli lib install "HID-Project" "Adafruit SSD1306" "Adafruit GFX Library"
+& $cli compile --fqbn redbearlab:avr:blendmicro16 firmware\redbearpad_gamepad
 ```
 
 FQBN: `redbearlab:avr:blendmicro16` (16 MHz, overclock) o
@@ -34,7 +36,7 @@ El Blend Micro usa el bootloader Caterina (protocolo avr109, *1200 bps touch*).
 Conectar por USB, identificar el puerto COM y subir:
 
 ```powershell
-& $cli upload --fqbn redbearlab:avr:blendmicro16 --libraries <carpeta_libs> -p COM<N> firmware\redbearpad_gamepad
+& $cli upload --fqbn redbearlab:avr:blendmicro16 -p COM<N> firmware\redbearpad_gamepad
 ```
 
 Desde el IDE de Arduino: seleccionar la placa *Blend Micro 3.3V/16MHz*, el puerto,

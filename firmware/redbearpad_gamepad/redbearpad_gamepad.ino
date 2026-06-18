@@ -69,6 +69,7 @@ void dibujarPantalla(const bool pulsado[]) {
 }
 
 void setup() {
+  Serial.begin(115200);             // monitor serie (CDC sobre USB); no bloquea si no hay PC
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     pinMode(PIN_BOTON[i], INPUT_PULLUP);
     estadoPrev[i] = false;          // sin pulsar
@@ -76,6 +77,7 @@ void setup() {
   }
 
   Gamepad.begin();                  // arranca el HID
+  Serial.println(F("RedBearPad listo - 8 botones HID"));
 
   // La pantalla es opcional para el test: si falla, el gamepad sigue funcionando.
   oledOk = oled.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
@@ -107,6 +109,10 @@ void loop() {
       if (leido) Gamepad.press(i + 1);
       else       Gamepad.release(i + 1);
       huboCambio = true;
+      // Eco por el monitor serie, util para depurar sin abrir el panel de juegos.
+      Serial.print(F("B"));
+      Serial.print(i + 1);
+      Serial.println(leido ? F(" pulsado") : F(" soltado"));
     }
   }
 

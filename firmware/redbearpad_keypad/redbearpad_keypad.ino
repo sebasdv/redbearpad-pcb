@@ -1,13 +1,15 @@
 /*
- * RedBearPad - Gamepad USB HID de 8 botones con OLED 128x32
+ * RedBearPad - Keypad USB HID de 8 teclas con OLED 128x32
  * Placa: RedBearLab Blend Micro V1.0 (ATmega32U4, core redbearlab:avr)
  *
- * El PC lo ve como un control de juegos con 8 botones (Panel de control ->
- * "Configurar controladores de juego USB"). La OLED muestra en vivo que
- * boton esta pulsado, util para validar PCB, switches y pantalla.
+ * El PC lo ve como un teclado: cada switch envia una tecla mientras se mantiene
+ * pulsado. La OLED muestra en vivo que tecla esta activa.
+ *
+ * Mapeo de teclas:
+ *   B1->Esc  B2->W  B3->A  B4->S  B5->D  B6->Espacio  B7->Enter  B8->Shift
  *
  * Librerias necesarias (todas desde el Gestor de librerias de Arduino):
- *   - HID-Project      (NicoHood) -> provee el Gamepad USB HID
+ *   - HID-Project      (NicoHood) -> provee el Keyboard USB HID
  *   - Adafruit SSD1306
  *   - Adafruit GFX Library
  *
@@ -25,6 +27,22 @@
 const uint8_t NUM_BOTONES = 8;
 const uint8_t PIN_BOTON[NUM_BOTONES] = { 5, 8, 9, 10, 11, 12, A0, A1 };
 
+// ----- Tecla HID que envia cada boton (HID-Project KeyboardKeycode) -----
+const KeyboardKeycode TECLA[NUM_BOTONES] = {
+  KEY_ESC,        // B1
+  KEY_W,          // B2
+  KEY_A,          // B3
+  KEY_S,          // B4
+  KEY_D,          // B5
+  KEY_SPACE,      // B6
+  KEY_ENTER,      // B7
+  KEY_LEFT_SHIFT  // B8
+};
+// Etiqueta corta para la OLED / monitor serie de cada tecla.
+const char* const ETIQUETA[NUM_BOTONES] = {
+  "Esc", "W", "A", "S", "D", "Spc", "Ent", "Sft"
+};
+
 // ----- OLED 128x32 por I2C -----
 #define OLED_ANCHO   128
 #define OLED_ALTO    32
@@ -32,8 +50,7 @@ const uint8_t PIN_BOTON[NUM_BOTONES] = { 5, 8, 9, 10, 11, 12, A0, A1 };
 #define OLED_ADDR    0x3C    // direccion tipica de los modulos 128x32
 Adafruit_SSD1306 oled(OLED_ANCHO, OLED_ALTO, &Wire, OLED_RESET);
 
-// El gamepad HID lo provee HID-Project mediante el objeto global `Gamepad`.
-// Sus botones se numeran 1..32, por eso usamos (i + 1) al pulsar/soltar.
+// El teclado HID lo provee HID-Project mediante el objeto global `Keyboard`.
 
 // Estado previo de cada boton para enviar al PC solo en los cambios (con debounce).
 bool estadoPrev[NUM_BOTONES];
@@ -48,8 +65,8 @@ void dibujarPantalla(const bool pulsado[]) {
   oled.setTextSize(1);
   oled.setTextColor(SSD1306_WHITE);
   oled.setCursor(0, 0);
-  oled.println(F("RedBearPad  8-btn"));
-  // Dos filas de 4: numero del boton, en video inverso si esta pulsado.
+  oled.println(F("RedBearPad  keypad"));
+  // Dos filas de 4: etiqueta de la tecla, en video inverso si esta pulsada.
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     uint8_t col = i % 4;
     uint8_t fila = i / 4;
@@ -61,9 +78,8 @@ void dibujarPantalla(const bool pulsado[]) {
     } else {
       oled.setTextColor(SSD1306_WHITE);
     }
-    oled.setCursor(x + 4, y);
-    oled.print(F("B"));
-    oled.print(i + 1);
+    oled.setCursor(x + 2, y);
+    oled.print(ETIQUETA[i]);
   }
   oled.display();
 }
@@ -76,10 +92,10 @@ void setup() {
     ultimoCambio[i] = 0;
   }
 
-  Gamepad.begin();                  // arranca el HID
-  Serial.println(F("RedBearPad listo - 8 botones HID"));
+  Keyboard.begin();                 // arranca el HID
+  Serial.println(F("RedBearPad listo - keypad 8 teclas"));
 
-  // La pantalla es opcional para el test: si falla, el gamepad sigue funcionando.
+  // La pantalla es opcional para el test: si falla, el teclado sigue funcionando.
   oledOk = oled.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
   if (oledOk) {
     oled.clearDisplay();
@@ -94,7 +110,6 @@ void setup() {
 void loop() {
   bool pulsadoAhora[NUM_BOTONES];
   uint32_t ahora = millis();
-  bool huboCambio = false;
 
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     // INPUT_PULLUP: pin en LOW = boton pulsado.
@@ -105,18 +120,14 @@ void loop() {
       estadoPrev[i] = leido;
       ultimoCambio[i] = ahora;
       pulsadoAhora[i] = leido;
-      // HID-Project numera los botones desde 1.
-      if (leido) Gamepad.press(i + 1);
-      else       Gamepad.release(i + 1);
-      huboCambio = true;
-      // Eco por el monitor serie, util para depurar sin abrir el panel de juegos.
-      Serial.print(F("B"));
-      Serial.print(i + 1);
+      // press mantiene la tecla mientras el boton este pulsado; release al soltar.
+      if (leido) Keyboard.press(TECLA[i]);
+      else       Keyboard.release(TECLA[i]);
+      // Eco por el monitor serie.
+      Serial.print(ETIQUETA[i]);
       Serial.println(leido ? F(" pulsado") : F(" soltado"));
     }
   }
-
-  if (huboCambio) Gamepad.write();   // envia el reporte HID solo si cambio algo
 
   dibujarPantalla(pulsadoAhora);
 }

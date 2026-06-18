@@ -1,30 +1,40 @@
-# Firmware de prueba — RedBearPad Gamepad
+# Firmware de prueba — RedBearPad Keypad
 
-Sketch `redbearpad_gamepad/redbearpad_gamepad.ino`: convierte la placa en un
-**gamepad USB HID de 8 botones** y muestra el estado de cada botón en la OLED.
-Sirve para validar PCB, switches y pantalla, y para usar el control en juegos.
+Sketch `redbearpad_keypad/redbearpad_keypad.ino`: convierte la placa en un
+**teclado USB HID de 8 teclas** y muestra en la OLED qué tecla está activa.
+Sirve para validar PCB, switches y pantalla, y para usarlo como keypad de juego.
+
+Mapeo de teclas:
+
+| Botón | Tecla | Botón | Tecla |
+|---|---|---|---|
+| B1 | Esc | B5 | D |
+| B2 | W | B6 | Espacio |
+| B3 | A | B7 | Enter |
+| B4 | S | B8 | Shift (izq.) |
+
+Cada tecla se mantiene pulsada mientras el switch esté presionado (press/release).
 
 ## Requisitos
 
 1. **Core del Blend Micro** `redbearlab:avr` (repo `blend-micro-boards`).
    Comprobar: `arduino-cli core list` debe listar `redbearlab:avr`.
 2. **Librerías** (todas desde el Gestor de librerías de Arduino):
-   - **HID-Project** — NicoHood. Provee el `Gamepad` USB HID. Se usa esta y no
-     la librería "Joystick" porque hay dos "Joystick" distintas que comparten el
-     header `Joystick.h` (la de Heironimus emula un gamepad; la de Giuseppe
-     Martini lee joysticks analógicos) y colisionan. `HID-Project.h` no choca
-     con nada.
+   - **HID-Project** — NicoHood. Provee el `Keyboard` USB HID. Se usa esta (y no
+     la librería "Keyboard" del core ni "Joystick") porque su header
+     `HID-Project.h` no colisiona con otras librerías y trae teclado, gamepad y
+     más en un solo paquete.
    - **Adafruit SSD1306** y **Adafruit GFX Library**.
 
 ## Compilar
 
-Verificado en esta máquina con arduino-cli (18446 B flash / 64 %, 609 B RAM),
+Verificado en esta máquina con arduino-cli (19500 B flash / 68 %, 664 B RAM),
 usando solo librerías del Gestor (sin rutas extra):
 
 ```powershell
 $cli = "C:\redbearpad\tools\arduino-cli\arduino-cli.exe"
 & $cli lib install "HID-Project" "Adafruit SSD1306" "Adafruit GFX Library"
-& $cli compile --fqbn redbearlab:avr:blendmicro16 firmware\redbearpad_gamepad
+& $cli compile --fqbn redbearlab:avr:blendmicro16 firmware\redbearpad_keypad
 ```
 
 FQBN: `redbearlab:avr:blendmicro16` (16 MHz, overclock) o
@@ -36,7 +46,7 @@ El Blend Micro usa el bootloader Caterina (protocolo avr109, *1200 bps touch*).
 Conectar por USB, identificar el puerto COM y subir:
 
 ```powershell
-& $cli upload --fqbn redbearlab:avr:blendmicro16 -p COM<N> firmware\redbearpad_gamepad
+& $cli upload --fqbn redbearlab:avr:blendmicro16 -p COM<N> firmware\redbearpad_keypad
 ```
 
 Desde el IDE de Arduino: seleccionar la placa *Blend Micro 3.3V/16MHz*, el puerto,
@@ -47,11 +57,14 @@ el IDE indique "Subiendo" (el bootloader Caterina solo expone el puerto ~8 s).
 
 ## Comprobar que funciona
 
-- **PC:** Panel de control → *Configurar controladores de juego USB* → debe
-  aparecer "RedBearPad" (o "Blend Micro") con 8 botones que se encienden al pulsar.
-- **OLED:** muestra `RedBearPad 8-btn` y una rejilla B1…B8; el botón pulsado
-  se resalta en vídeo inverso. Si la pantalla no responde, revisar que su
-  dirección I2C sea `0x3C` (algunos módulos usan `0x3D`: cambiar `OLED_ADDR`).
+- **PC:** abrir cualquier editor de texto y pulsar los switches: deben escribirse
+  las teclas (W/A/S/D, Espacio, Enter) y actuar Esc y Shift.
+- **Monitor serie** (115200 baudios): imprime `RedBearPad listo - keypad 8 teclas`
+  y un eco `<tecla> pulsado` / `<tecla> soltado` en cada cambio.
+- **OLED:** muestra `RedBearPad keypad` y una rejilla Esc/W/A/S/D/Spc/Ent/Sft;
+  la tecla pulsada se resalta en vídeo inverso. Si la pantalla no responde,
+  revisar que su dirección I2C sea `0x3C` (algunos módulos usan `0x3D`: cambiar
+  `OLED_ADDR`).
 
 ## Mapeo de pines (fijado por la PCB)
 

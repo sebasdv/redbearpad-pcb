@@ -109,14 +109,15 @@ Datos extraídos del DXF oficial (`upstream/Blend/PCB/Blend_Micro.dxf`):
 ### Header OLED
 
 Header hembra 1×4, paso 2.54 mm, en la cara superior. El módulo comprado tiene
-los pines en el **borde corto izquierdo** (columna vertical), verificado con
-fotografía de la serigrafía (`C:\redbearpad\pin oled.jpeg`): de arriba hacia
-abajo **GND, VCC, SCL, SDA** con la pantalla de frente.
+los pines en el **borde corto izquierdo** (columna vertical). El orden de header
+en la placa, verificado contra el ajuste físico del módulo, es de arriba hacia
+abajo **SDA, SCL, VCC, GND** (la conexión eléctrica se preserva — SDA→SDA, etc.;
+este orden coloca cada pin del módulo en su pad correcto al enchufarlo).
 
 El header se coloca como columna vertical 1×4 en el extremo izquierdo de la zona
-SCREEN (x ≈ 30, pines centrados verticalmente en la zona: y ≈ 9.7 a 17.3, paso
-2.54 mm), con pin 1 = GND arriba. El cuerpo del módulo queda en voladizo hacia
-la derecha cubriendo el resto de la zona.
+SCREEN (x ≈ 30, pines centrados verticalmente en la zona: y = 9.7, 12.24, 14.78,
+17.32, paso 2.54 mm), con **pin 1 = SDA arriba** y pin 4 = GND abajo. El cuerpo
+del módulo queda en voladizo hacia la derecha cubriendo el resto de la zona.
 
 ## Reglas de diseño y fabricación
 
@@ -148,10 +149,10 @@ Automatizada en esta máquina con `kicad-cli`:
 
 Checkpoints físicos del usuario **antes de enviar a fabricar**:
 
-1. Medir con calibrador los 3 agujeros del switch Redragon real contra el
-   footprint (poste Ø4.4 en centro; pines en (3.8, 3.8) y (0, 6.5), Ø1.2).
-2. ~~Confirmar el orden de pines del módulo OLED~~ — **resuelto**: verificado por
-   fotografía (GND, VCC, SCL, SDA, pines en el borde corto izquierdo).
+1. ~~Medir los 3 agujeros del switch Redragon~~ — **resuelto**: el usuario confirmó
+   que el footprint coincide con el switch físico.
+2. ~~Confirmar el orden de pines del módulo OLED~~ — **resuelto**: orden corregido
+   a SDA, SCL, VCC, GND según el ajuste físico del módulo.
 3. Revisar los renders (posiciones, serigrafía, orientación del Blend Micro).
 
 ## Riesgos

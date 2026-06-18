@@ -88,7 +88,8 @@ J1_NETS = ["GND", "GND", None, None, None, None, None, None, None, None,
            "SDA", "SCL", "SW1", "SW2"]
 J2_NETS = ["GND", "+3V3", None, None, None, None, None, "SW8", "SW7", None,
            "SW6", "SW5", "SW4", "SW3"]
-J3_NETS = ["GND", "+3V3", "SCL", "SDA"]
+# Orden fisico del modulo OLED comprado: pin 1 = SDA ... pin 4 = GND.
+J3_NETS = ["SDA", "SCL", "+3V3", "GND"]
 
 body = []
 

@@ -205,10 +205,12 @@ TRACKS = [
     ("SW6", pcbnew.F_Cu, 0.25, [(67.8, 35.8), (70.5, 33), (70.5, 29.2), (57.5, 29.2), (57.5, 27.067), (55.62, 27.067)]),
     ("SW7", pcbnew.F_Cu, 0.25, [(83.8, 35.8), (83.8, 28), (58.3, 28), (58.3, 21.987), (55.62, 21.987)]),
     ("SW8", pcbnew.F_Cu, 0.25, [(83.8, 51.8), (88, 48), (88, 24), (59.1, 24), (59.1, 19.447), (55.62, 19.447)]),
-    ("SDA", pcbnew.F_Cu, 0.25, [(30, 17.32), (36, 22), (38.5, 27.067), (40.38, 27.067)]),
-    ("SCL", pcbnew.B_Cu, 0.25, [(30, 14.78), (34, 20), (38, 29.607), (40.38, 29.607)]),
+    # OLED J3 reordenado (pin1=SDA y=9.7, pin2=SCL y=12.24, pin3=+3V3 y=14.78, pin4=GND y=17.32).
+    ("SDA", pcbnew.F_Cu, 0.25, [(30, 9.7), (35, 16), (38.5, 27.067), (40.38, 27.067)]),
+    # SCL sale casi horizontal para despejar el pad +3V3 de abajo antes de bajar.
+    ("SCL", pcbnew.B_Cu, 0.25, [(30, 12.24), (36, 13.5), (38, 29.607), (40.38, 29.607)]),
     # +3V3 entera en B.Cu: rodea por el sur (y=40.6) y sube por x=58.5 hasta J2.2.
-    ("+3V3", pcbnew.B_Cu, 0.5, [(30, 12.24), (27.5, 14.5), (27.5, 40.6), (58.5, 40.6), (58.5, 4.207), (55.62, 4.207)]),
+    ("+3V3", pcbnew.B_Cu, 0.5, [(30, 14.78), (27.5, 16.5), (27.5, 40.6), (58.5, 40.6), (58.5, 4.207), (55.62, 4.207)]),
 ]
 for net, layer, width, pts in TRACKS:
     for a, b in zip(pts, pts[1:]):
@@ -238,7 +240,7 @@ for ref, (_, x, y, _) in PLACE.items():
     if ref.startswith("SW"):
         lx, ly = SILK_SW.get(ref, (x, y - 8.2))
         silk(ref, lx, ly, size=1.0)
-for lbl, py in (("GND", 9.7), ("VCC", 12.24), ("SCL", 14.78), ("SDA", 17.32)):
+for lbl, py in (("SDA", 9.7), ("SCL", 12.24), ("VCC", 14.78), ("GND", 17.32)):
     silk(lbl, 26.0, py, size=0.9)
 
 def silk_line(x1, y1, x2, y2, layer):

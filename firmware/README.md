@@ -28,7 +28,7 @@ Cada tecla se mantiene pulsada mientras el switch esté presionado (press/releas
 
 ## Compilar
 
-Verificado en esta máquina con arduino-cli (19500 B flash / 68 %, 664 B RAM),
+Verificado en esta máquina con arduino-cli (20026 B flash / 69 %, 668 B RAM),
 usando solo librerías del Gestor (sin rutas extra):
 
 ```powershell

@@ -92,14 +92,33 @@ void setup() {
     ultimoCambio[i] = 0;
   }
 
-  Keyboard.begin();                 // arranca el HID
-  Serial.println(F("RedBearPad listo - keypad 8 teclas"));
+  // La pantalla es opcional: probar 0x3C y, si falla, 0x3D (modulos varian).
+  oledOk = oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  if (!oledOk) oledOk = oled.begin(SSD1306_SWITCHCAPVCC, 0x3D);
 
-  // La pantalla es opcional para el test: si falla, el teclado sigue funcionando.
-  oledOk = oled.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
-  if (oledOk) {
-    dibujarPantalla(estadoPrev);   // rejilla inicial (todo sin pulsar)
+  // DIAGNOSTICO: con nada pulsado todos los pines deben leer HIGH. Si alguno
+  // arranca en LOW, ese pin esta clavado (mal cableado, puente, o uso on-board)
+  // y generaria una tecla fantasma. Esperar a que el monitor serie se conecte.
+  uint32_t t0 = millis();
+  while (!Serial && millis() - t0 < 3000) { /* espera hasta 3 s al PC */ }
+  Serial.println(F("=== RedBearPad keypad - autodiagnostico de pines ==="));
+  bool algunoClavado = false;
+  for (uint8_t i = 0; i < NUM_BOTONES; i++) {
+    bool low = (digitalRead(PIN_BOTON[i]) == LOW);
+    Serial.print(ETIQUETA[i]);
+    Serial.print(F(" (pin "));
+    Serial.print(PIN_BOTON[i]);
+    Serial.print(F("): "));
+    Serial.println(low ? F("LOW  <-- CLAVADO sin pulsar!") : F("HIGH ok"));
+    if (low) algunoClavado = true;
   }
+  Serial.println(algunoClavado
+    ? F("AVISO: hay pines en LOW al arranque -> revisar cableado/HW")
+    : F("Pines OK. Arrancando teclado HID."));
+
+  Keyboard.begin();                 // arranca el HID despues del diagnostico
+
+  if (oledOk) dibujarPantalla(estadoPrev);   // rejilla inicial (todo sin pulsar)
 }
 
 void loop() {
@@ -126,7 +145,12 @@ void loop() {
     }
   }
 
-  // Refrescar la OLED SOLO cuando cambia algo: volcar el framebuffer completo por
-  // I2C en cada vuelta saturaba el bus y dejaba sin tiempo al USB (HID + Serial).
-  if (huboCambio) dibujarPantalla(pulsadoAhora);
+  // Refrescar la OLED al cambiar, y ademas un refresco lento de respaldo (~4 Hz)
+  // por si la pantalla pierde el contenido. Volcar el framebuffer en CADA vuelta
+  // saturaba el I2C y dejaba sin tiempo al USB (HID + Serial) -> el "colapso".
+  static uint32_t ultimoRefresco = 0;
+  if (oledOk && (huboCambio || ahora - ultimoRefresco > 250)) {
+    dibujarPantalla(pulsadoAhora);
+    ultimoRefresco = ahora;
+  }
 }

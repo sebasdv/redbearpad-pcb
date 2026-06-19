@@ -98,18 +98,14 @@ void setup() {
   // La pantalla es opcional para el test: si falla, el teclado sigue funcionando.
   oledOk = oled.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
   if (oledOk) {
-    oled.clearDisplay();
-    oled.setTextSize(1);
-    oled.setTextColor(SSD1306_WHITE);
-    oled.setCursor(0, 12);
-    oled.println(F("RedBearPad listo"));
-    oled.display();
+    dibujarPantalla(estadoPrev);   // rejilla inicial (todo sin pulsar)
   }
 }
 
 void loop() {
   bool pulsadoAhora[NUM_BOTONES];
   uint32_t ahora = millis();
+  bool huboCambio = false;
 
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     // INPUT_PULLUP: pin en LOW = boton pulsado.
@@ -120,6 +116,7 @@ void loop() {
       estadoPrev[i] = leido;
       ultimoCambio[i] = ahora;
       pulsadoAhora[i] = leido;
+      huboCambio = true;
       // press mantiene la tecla mientras el boton este pulsado; release al soltar.
       if (leido) Keyboard.press(TECLA[i]);
       else       Keyboard.release(TECLA[i]);
@@ -129,5 +126,7 @@ void loop() {
     }
   }
 
-  dibujarPantalla(pulsadoAhora);
+  // Refrescar la OLED SOLO cuando cambia algo: volcar el framebuffer completo por
+  // I2C en cada vuelta saturaba el bus y dejaba sin tiempo al USB (HID + Serial).
+  if (huboCambio) dibujarPantalla(pulsadoAhora);
 }

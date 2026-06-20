@@ -52,10 +52,14 @@ Adafruit_SSD1306 oled(OLED_ANCHO, OLED_ALTO, &Wire, OLED_RESET);
 
 // El teclado HID lo provee HID-Project mediante el objeto global `Keyboard`.
 
-// Estado previo de cada boton para enviar al PC solo en los cambios (con debounce).
-bool estadoPrev[NUM_BOTONES];
-uint32_t ultimoCambio[NUM_BOTONES];
-const uint16_t DEBOUNCE_MS = 15;
+// Debounce por integracion: la lectura cruda debe mantenerse ESTABLE durante
+// DEBOUNCE_MS antes de aceptarla. Asi se rechazan glitches breves de crosstalk
+// entre pines vecinos (p.ej. pulsar SW1/D5 inducia un pico en SW2/D8, adyacentes
+// en el header J1) que un debounce de tipo "lockout" dejaba pasar.
+bool estadoPrev[NUM_BOTONES];     // estado aceptado (ya filtrado)
+bool lecturaRaw[NUM_BOTONES];     // ultima lectura cruda del pin
+uint32_t tLecturaRaw[NUM_BOTONES]; // instante en que cambio la lectura cruda
+const uint16_t DEBOUNCE_MS = 25;  // ms que debe mantenerse estable para aceptar
 
 bool oledOk = false;
 
@@ -89,7 +93,8 @@ void setup() {
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     pinMode(PIN_BOTON[i], INPUT_PULLUP);
     estadoPrev[i] = false;          // sin pulsar
-    ultimoCambio[i] = 0;
+    lecturaRaw[i] = false;
+    tLecturaRaw[i] = 0;
   }
 
   // La pantalla es opcional: probar 0x3C y, si falla, 0x3D (modulos varian).
@@ -129,11 +134,19 @@ void loop() {
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     // INPUT_PULLUP: pin en LOW = boton pulsado.
     bool leido = (digitalRead(PIN_BOTON[i]) == LOW);
+
+    // Si la lectura cruda cambia, reinicia el cronometro de estabilidad.
+    if (leido != lecturaRaw[i]) {
+      lecturaRaw[i] = leido;
+      tLecturaRaw[i] = ahora;
+    }
+
     pulsadoAhora[i] = estadoPrev[i];
 
-    if (leido != estadoPrev[i] && (ahora - ultimoCambio[i]) > DEBOUNCE_MS) {
+    // Solo se acepta el cambio si la lectura lleva DEBOUNCE_MS estable.
+    // Un glitch de crosstalk (mas corto que DEBOUNCE_MS) nunca llega a aceptarse.
+    if (leido != estadoPrev[i] && (ahora - tLecturaRaw[i]) >= DEBOUNCE_MS) {
       estadoPrev[i] = leido;
-      ultimoCambio[i] = ahora;
       pulsadoAhora[i] = leido;
       huboCambio = true;
       // press mantiene la tecla mientras el boton este pulsado; release al soltar.

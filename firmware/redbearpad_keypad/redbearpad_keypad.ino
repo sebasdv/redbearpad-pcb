@@ -97,6 +97,13 @@ void setup() {
     tLecturaRaw[i] = 0;
   }
 
+  // CLAVE: timeout del I2C antes de tocar el bus. En AVR, Wire se cuelga para
+  // siempre si el bus se traba (SDA/SCL retenida, ruido, pull-ups debiles) y eso
+  // congelaria TODO el loop, teclado incluido. Con timeout, una transaccion
+  // trabada aborta a los 25 ms, se resetea el bus y el teclado sigue vivo.
+  Wire.begin();
+  Wire.setWireTimeout(25000 /*us*/, true /*resetea el bus al expirar*/);
+
   // La pantalla es opcional: probar 0x3C y, si falla, 0x3D (modulos varian).
   oledOk = oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   if (!oledOk) oledOk = oled.begin(SSD1306_SWITCHCAPVCC, 0x3D);

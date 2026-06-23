@@ -119,6 +119,79 @@ void dinoReset() {
   juego.animCnt = 0;
   for (uint8_t i = 0; i < MAX_OBST; i++) juego.obst[i].activo = false;
 }
+
+// Avanza un frame del juego. 'arriba'/'abajo' son los estados ya filtrados.
+void dinoUpdate(bool arriba, bool abajo) {
+  if (juego.gameOver) {
+    if (arriba && !juego.arribaPrev) dinoReset();   // reinicio por flanco de subida
+    juego.arribaPrev = arriba;
+    return;
+  }
+
+  // Salto: flanco de subida y en el suelo.
+  if (arriba && !juego.arribaPrev && juego.enSuelo) {
+    juego.velY = -IMPULSO;
+    juego.enSuelo = false;
+  }
+  juego.arribaPrev = arriba;
+
+  // Agachado: solo en el suelo y con abajo mantenido.
+  juego.agachado = (abajo && juego.enSuelo);
+
+  // Fisica vertical (subpixeles).
+  if (!juego.enSuelo) {
+    juego.velY += GRAVEDAD;
+    juego.posY += juego.velY;
+    if (juego.posY >= DINO_SUELO) {
+      juego.posY = DINO_SUELO;
+      juego.velY = 0;
+      juego.enSuelo = true;
+    }
+  }
+
+  // Mover obstaculos y reciclar los que salen por la izquierda.
+  for (uint8_t i = 0; i < MAX_OBST; i++) {
+    if (!juego.obst[i].activo) continue;
+    juego.obst[i].x -= juego.vel;
+    if (juego.obst[i].x < -16) juego.obst[i].activo = false;
+  }
+
+  // Generar nuevo obstaculo cuando toca.
+  if (--juego.tProx <= 0) {
+    for (uint8_t i = 0; i < MAX_OBST; i++) {
+      if (!juego.obst[i].activo) {
+        juego.obst[i].activo = true;
+        juego.obst[i].x = 128;
+        juego.obst[i].tipo = (random(0, 10) < 3) ? 1 : 0;  // ~30% pajaro
+        break;
+      }
+    }
+    juego.tProx = random(45, 90);  // frames hasta el proximo
+  }
+
+  // Caja del dino segun estado (encogida 2 px para una colision justa).
+  int16_t dy = juego.agachado ? (GROUND_Y - DUCK_H) : (juego.posY >> 3);
+  int16_t dh = juego.agachado ? DUCK_H : DINO_H;
+
+  // Colision contra cada obstaculo.
+  for (uint8_t i = 0; i < MAX_OBST; i++) {
+    if (!juego.obst[i].activo) continue;
+    int16_t ox = juego.obst[i].x, oy, ow, oh;
+    if (juego.obst[i].tipo == 0) { ow = 8;  oh = 12; oy = GROUND_Y - oh;      } // cactus
+    else                         { ow = 14; oh = 8;  oy = GROUND_Y - 20;      } // pajaro
+    if (solapan(DINO_X + 2, dy + 2, DINO_W - 4, dh - 4,
+                ox + 1, oy + 1, ow - 2, oh - 2)) {
+      juego.gameOver = true;
+    }
+  }
+
+  // Puntaje y dificultad creciente.
+  juego.puntaje++;
+  if ((juego.puntaje % 200) == 0 && juego.vel < 6) juego.vel++;
+
+  // Animacion (cada 4 frames alterna).
+  if (++juego.animCnt >= 4) { juego.animCnt = 0; juego.anim ^= 1; }
+}
 // ================================================================
 
 // Combina las 4 direcciones en un valor de hat (incluye diagonales).

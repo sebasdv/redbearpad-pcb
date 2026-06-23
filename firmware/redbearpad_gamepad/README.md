@@ -37,3 +37,19 @@ fallos erráticos.
   autodiagnóstico de pines y el escaneo I2C; luego un eco `dpad=N botones=XXXX`.
 - **Steam:** Configuración → Controlador → habilitar soporte de controles genéricos;
   configurar en Steam Input (la cruceta se puede asignar a d-pad o stick).
+
+## Mini-juego del dino en la OLED
+
+La OLED muestra el juego del dinosaurio de Chrome, jugable mientras el mando sigue
+funcionando como gamepad:
+
+- **Arriba (SW2):** saltar (esquiva cactus).
+- **Abajo (SW4):** agacharse (pasa bajo los pájaros).
+- Chocar → "GAME OVER" + puntaje; **arriba** reinicia.
+
+Es a la vez un demo para previsualizar que los direccionales responden. Corre a ~30 FPS
+(I2C a 400 kHz). Mientras el dino corre añade ~12 ms de latencia al HID (aceptable).
+
+Parámetros ajustables en el sketch: `IMPULSO`/`GRAVEDAD` (salto), `FRAME_MS` (FPS),
+`GROUND_Y` y tamaños de obstáculos. Si no hay OLED, el juego se omite y el gamepad
+funciona igual.

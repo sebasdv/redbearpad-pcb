@@ -128,7 +128,7 @@ void dinoUpdate(bool arriba, bool abajo, bool reiniciar) {
   juego.reinicioPrev = reiniciar;
 
   if (juego.gameOver) {
-    if (reinicioFlanco) dinoReset();   // reinicio por flanco de subida de B1
+    if (reinicioFlanco) { Serial.println(F("dino: reinicio (B1)")); dinoReset(); }   // flanco de B1
     juego.arribaPrev = arriba;
     return;
   }
@@ -189,6 +189,7 @@ void dinoUpdate(bool arriba, bool abajo, bool reiniciar) {
       juego.gameOver = true;
     }
   }
+  if (juego.gameOver) Serial.println(F("dino: game over"));
 
   // Puntaje y dificultad creciente.
   juego.puntaje++;

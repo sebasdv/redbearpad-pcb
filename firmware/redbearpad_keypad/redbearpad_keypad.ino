@@ -52,14 +52,19 @@ Adafruit_SSD1306 oled(OLED_ANCHO, OLED_ALTO, &Wire, OLED_RESET);
 
 // El teclado HID lo provee HID-Project mediante el objeto global `Keyboard`.
 
-// Debounce por integracion: la lectura cruda debe mantenerse ESTABLE durante
-// DEBOUNCE_MS antes de aceptarla. Asi se rechazan glitches breves de crosstalk
-// entre pines vecinos (p.ej. pulsar SW1/D5 inducia un pico en SW2/D8, adyacentes
-// en el header J1) que un debounce de tipo "lockout" dejaba pasar.
-bool estadoPrev[NUM_BOTONES];     // estado aceptado (ya filtrado)
-bool lecturaRaw[NUM_BOTONES];     // ultima lectura cruda del pin
-uint32_t tLecturaRaw[NUM_BOTONES]; // instante en que cambio la lectura cruda
-const uint16_t DEBOUNCE_MS = 25;  // ms que debe mantenerse estable para aceptar
+// Debounce por INTEGRADOR con histeresis, muestreado a intervalo FIJO.
+// Por que: con pull-up interno (alta impedancia) la linea sube "sucia" al soltar.
+// El debounce anterior ("estable N ms, se reinicia con CADA glitch") se atascaba:
+// con el loop a ~16 kHz (Serial cerrado) cazaba cada glitch, reiniciaba el conteo
+// y el release NUNCA se aceptaba -> la tecla quedaba pegada -> autorepeat del SO.
+// El integrador sube con LOW y baja con HIGH; un glitch disperso solo mueve el
+// contador 1 y no alcanza a voltear el estado. Muestrear a SAMPLE_MS fijo hace
+// que el filtro NO dependa de la velocidad del loop (ni del Serial).
+bool estadoPrev[NUM_BOTONES];        // estado aceptado (filtrado): true = pulsado
+uint8_t integrador[NUM_BOTONES];     // 0..INTEGRADOR_MAX por tecla
+uint32_t tUltimoSample = 0;          // ultimo instante de muestreo
+const uint8_t SAMPLE_MS = 1;         // periodo de muestreo fijo (ms)
+const uint8_t INTEGRADOR_MAX = 12;   // ~12 ms de senal predominante para cambiar
 
 bool oledOk = false;
 
@@ -93,8 +98,7 @@ void setup() {
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     pinMode(PIN_BOTON[i], INPUT_PULLUP);
     estadoPrev[i] = false;          // sin pulsar
-    lecturaRaw[i] = false;
-    tLecturaRaw[i] = 0;
+    integrador[i] = 0;              // integrador en reposo (soltado)
   }
 
   // CLAVE: timeout del I2C antes de tocar el bus. En AVR, Wire se cuelga para
@@ -134,34 +138,41 @@ void setup() {
 }
 
 void loop() {
-  bool pulsadoAhora[NUM_BOTONES];
   uint32_t ahora = millis();
   bool huboCambio = false;
+  bool pulsadoAhora[NUM_BOTONES];
+  for (uint8_t i = 0; i < NUM_BOTONES; i++) pulsadoAhora[i] = estadoPrev[i];
 
-  for (uint8_t i = 0; i < NUM_BOTONES; i++) {
-    // INPUT_PULLUP: pin en LOW = boton pulsado.
-    bool leido = (digitalRead(PIN_BOTON[i]) == LOW);
+  // Muestreo a intervalo FIJO (SAMPLE_MS): el filtro no depende de cuan rapido
+  // corra el loop, asi que se comporta igual con el Serial abierto o cerrado.
+  if (ahora - tUltimoSample >= SAMPLE_MS) {
+    tUltimoSample = ahora;
 
-    // Si la lectura cruda cambia, reinicia el cronometro de estabilidad.
-    if (leido != lecturaRaw[i]) {
-      lecturaRaw[i] = leido;
-      tLecturaRaw[i] = ahora;
-    }
+    for (uint8_t i = 0; i < NUM_BOTONES; i++) {
+      // INPUT_PULLUP: pin en LOW = boton pulsado.
+      bool leido = (digitalRead(PIN_BOTON[i]) == LOW);
 
-    pulsadoAhora[i] = estadoPrev[i];
+      // Integrador: sube hacia INTEGRADOR_MAX con LOW, baja hacia 0 con HIGH.
+      if (leido) { if (integrador[i] < INTEGRADOR_MAX) integrador[i]++; }
+      else       { if (integrador[i] > 0)              integrador[i]--; }
 
-    // Solo se acepta el cambio si la lectura lleva DEBOUNCE_MS estable.
-    // Un glitch de crosstalk (mas corto que DEBOUNCE_MS) nunca llega a aceptarse.
-    if (leido != estadoPrev[i] && (ahora - tLecturaRaw[i]) >= DEBOUNCE_MS) {
-      estadoPrev[i] = leido;
-      pulsadoAhora[i] = leido;
-      huboCambio = true;
-      // press mantiene la tecla mientras el boton este pulsado; release al soltar.
-      if (leido) Keyboard.press(TECLA[i]);
-      else       Keyboard.release(TECLA[i]);
-      // Eco por el monitor serie.
-      Serial.print(ETIQUETA[i]);
-      Serial.println(leido ? F(" pulsado") : F(" soltado"));
+      // Histeresis: solo se voltea en los extremos; el ruido disperso (que no
+      // llega a un extremo) mantiene el estado anterior y no genera eventos.
+      bool nuevo = estadoPrev[i];
+      if (integrador[i] >= INTEGRADOR_MAX) nuevo = true;   // pulsado confirmado
+      else if (integrador[i] == 0)         nuevo = false;  // soltado confirmado
+
+      if (nuevo != estadoPrev[i]) {
+        estadoPrev[i] = nuevo;
+        pulsadoAhora[i] = nuevo;
+        huboCambio = true;
+        // press mantiene la tecla mientras este pulsado; release al soltar.
+        if (nuevo) Keyboard.press(TECLA[i]);
+        else       Keyboard.release(TECLA[i]);
+        // Eco por el monitor serie.
+        Serial.print(ETIQUETA[i]);
+        Serial.println(nuevo ? F(" pulsado") : F(" soltado"));
+      }
     }
   }
 

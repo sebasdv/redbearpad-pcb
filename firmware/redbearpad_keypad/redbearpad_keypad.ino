@@ -93,6 +93,36 @@ void dibujarPantalla(const bool pulsado[]) {
   oled.display();
 }
 
+// true si un dispositivo I2C ACKea en esa direccion. Usa el timeout de Wire, asi que
+// no se cuelga si el bus esta trabado.
+bool i2cResponde(uint8_t addr) {
+  Wire.beginTransmission(addr);
+  return (Wire.endTransmission() == 0);
+}
+
+// Escaneo del bus I2C: lista las direcciones que responden. Sirve para diagnosticar
+// la OLED (suele estar en 0x3C o 0x3D). Si no responde nada, el problema esta en el
+// cableado (SDA/SCL/VCC/GND) o el modulo, no en el sketch.
+void escanearI2C() {
+  Serial.println(F("=== Escaneo I2C ==="));
+  uint8_t encontrados = 0;
+  for (uint8_t addr = 1; addr < 127; addr++) {
+    if (i2cResponde(addr)) {
+      Serial.print(F("  dispositivo en 0x"));
+      if (addr < 16) Serial.print('0');
+      Serial.println(addr, HEX);
+      encontrados++;
+    }
+  }
+  if (encontrados == 0)
+    Serial.println(F("  nada respondio -> revisar SDA/SCL/VCC/GND o el modulo OLED"));
+  else {
+    Serial.print(F("  total dispositivos: "));
+    Serial.println(encontrados);
+  }
+  Serial.println(F("  (la OLED 128x32 suele estar en 0x3C o 0x3D)"));
+}
+
 void setup() {
   Serial.begin(115200);             // monitor serie (CDC sobre USB); no bloquea si no hay PC
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
@@ -108,9 +138,14 @@ void setup() {
   Wire.begin();
   Wire.setWireTimeout(25000 /*us*/, true /*resetea el bus al expirar*/);
 
-  // La pantalla es opcional: probar 0x3C y, si falla, 0x3D (modulos varian).
-  oledOk = oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  if (!oledOk) oledOk = oled.begin(SSD1306_SWITCHCAPVCC, 0x3D);
+  // La pantalla es opcional. PRIMERO se verifica por I2C si el chip realmente responde:
+  // Adafruit_SSD1306::begin() devuelve true aunque NO haya pantalla (solo reserva el
+  // buffer, no comprueba el ACK). Probando el ACK antes, oledOk refleja la presencia
+  // real y se inicializa en la direccion que de verdad contesta (0x3C o 0x3D).
+  uint8_t oledAddr = 0;
+  if (i2cResponde(0x3C))      oledAddr = 0x3C;
+  else if (i2cResponde(0x3D)) oledAddr = 0x3D;
+  oledOk = (oledAddr != 0) && oled.begin(SSD1306_SWITCHCAPVCC, oledAddr);
 
   // DIAGNOSTICO: con nada pulsado todos los pines deben leer HIGH. Si alguno
   // arranca en LOW, ese pin esta clavado (mal cableado, puente, o uso on-board)
@@ -131,6 +166,12 @@ void setup() {
   Serial.println(algunoClavado
     ? F("AVISO: hay pines en LOW al arranque -> revisar cableado/HW")
     : F("Pines OK. Arrancando teclado HID."));
+
+  // Diagnostico de pantalla: escaneo del bus y estado de la OLED.
+  escanearI2C();
+  Serial.print(F("OLED: "));
+  Serial.println(oledOk ? F("detectada e inicializada")
+                        : F("NO detectada (ver escaneo I2C de arriba)"));
 
   Keyboard.begin();                 // arranca el HID despues del diagnostico
 

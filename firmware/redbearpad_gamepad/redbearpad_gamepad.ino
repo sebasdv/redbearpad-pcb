@@ -310,45 +310,6 @@ void escanearI2C() {
   if (n == 0) Serial.println(F("  nada respondio -> revisar SDA/SCL/VCC/GND o el modulo OLED"));
 }
 
-// Dibuja el estado del mando: direccion de la cruceta + botones 1..4 (resaltados).
-void dibujarPantalla() {
-  oled.clearDisplay();
-  oled.setTextSize(1);
-  oled.setTextColor(SSD1306_WHITE);
-  oled.setCursor(0, 0);
-  oled.println(F("RedBearPad gamepad"));
-
-  int8_t d = calcularDpad(estadoPrev[IDX_UP], estadoPrev[IDX_DOWN],
-                          estadoPrev[IDX_LEFT], estadoPrev[IDX_RIGHT]);
-  const char* dir = "centro";
-  switch (d) {
-    case GAMEPAD_DPAD_UP:         dir = "arriba";  break;
-    case GAMEPAD_DPAD_DOWN:       dir = "abajo";   break;
-    case GAMEPAD_DPAD_LEFT:       dir = "izq";     break;
-    case GAMEPAD_DPAD_RIGHT:      dir = "der";     break;
-    case GAMEPAD_DPAD_UP_LEFT:    dir = "arr-izq"; break;
-    case GAMEPAD_DPAD_UP_RIGHT:   dir = "arr-der"; break;
-    case GAMEPAD_DPAD_DOWN_LEFT:  dir = "aba-izq"; break;
-    case GAMEPAD_DPAD_DOWN_RIGHT: dir = "aba-der"; break;
-  }
-  oled.setCursor(0, 12);
-  oled.print(F("Dir: ")); oled.print(dir);
-
-  for (uint8_t b = 0; b < 4; b++) {
-    bool on = estadoPrev[IDX_BTN[b]];
-    int16_t x = b * 32;
-    if (on) {
-      oled.fillRect(x, 23, 30, 9, SSD1306_WHITE);
-      oled.setTextColor(SSD1306_BLACK);
-    } else {
-      oled.setTextColor(SSD1306_WHITE);
-    }
-    oled.setCursor(x + 2, 24);
-    oled.print('B'); oled.print(b + 1);
-  }
-  oled.display();
-}
-
 void setup() {
   Serial.begin(115200);
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
@@ -359,6 +320,7 @@ void setup() {
 
   Wire.begin();
   Wire.setWireTimeout(25000 /*us*/, true /*resetea el bus al expirar*/);
+  Wire.setClock(400000);  // SSD1306 soporta 400 kHz -> frames mas rapidos
 
   // Deteccion honesta de OLED: probar ACK por I2C antes de begin (Adafruit begin()
   // devuelve true aunque no haya pantalla). Probar 0x3C y, si falla, 0x3D.
@@ -382,10 +344,12 @@ void setup() {
   Serial.print(F("OLED: "));
   Serial.println(oledOk ? F("detectada") : F("NO detectada (ver escaneo I2C)"));
   probarDpad();
+  probarColision();
 
   Gamepad.begin();
   Serial.println(F("Gamepad HID iniciado."));
-  if (oledOk) dibujarPantalla();
+  randomSeed(micros());
+  dinoReset();
 }
 
 void loop() {
@@ -429,7 +393,13 @@ void loop() {
     Serial.print(F(" botones="));
     for (uint8_t b = 0; b < 4; b++) Serial.print(estadoPrev[IDX_BTN[b]] ? '1' : '0');
     Serial.println();
+  }
 
-    if (oledOk) dibujarPantalla();   // redibujo SOLO al cambiar -> sin parpadeo
+  // Game loop del dino en la OLED, a FRAME_MS fijo. No toca el envio HID.
+  static uint32_t tUltimoFrame = 0;
+  if (oledOk && (ahora - tUltimoFrame >= FRAME_MS)) {
+    tUltimoFrame = ahora;
+    dinoUpdate(estadoPrev[IDX_UP], estadoPrev[IDX_DOWN]);
+    dinoRender();
   }
 }

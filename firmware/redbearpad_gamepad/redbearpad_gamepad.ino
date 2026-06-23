@@ -46,8 +46,8 @@ const uint8_t DINO_W    = 16;
 const uint8_t DINO_H    = 16;
 const uint8_t DUCK_H    = 8;     // alto del dino agachado (mismo ancho 16)
 const uint8_t FRAME_MS  = 33;    // ~30 FPS
-const int16_t GRAVEDAD  = 4;     // subpixeles (1/8 px) por frame^2  [ajustable]
-const int16_t IMPULSO   = 28;    // velocidad inicial de salto (subpx/frame) [ajustable]
+const int16_t GRAVEDAD  = 2;     // subpixeles (1/8 px) por frame^2  [ajustable]
+const int16_t IMPULSO   = 20;    // velocidad inicial de salto (subpx/frame) [ajustable]
 const uint8_t MAX_OBST  = 3;
 const int16_t DINO_SUELO = (int16_t)(GROUND_Y - DINO_H) << 3;  // posY en el suelo (subpx)
 
@@ -78,7 +78,8 @@ struct Juego {
   bool     enSuelo;
   bool     agachado;
   bool     gameOver;
-  bool     arribaPrev; // para detectar flanco de subida (saltar/reiniciar)
+  bool     arribaPrev;   // flanco de subida para saltar
+  bool     reinicioPrev; // flanco de subida del boton de reinicio (B1)
   uint16_t puntaje;
   uint8_t  vel;        // px/frame de scroll
   int16_t  tProx;      // frames hasta el proximo obstaculo
@@ -112,6 +113,7 @@ void dinoReset() {
   juego.agachado = false;
   juego.gameOver = false;
   juego.arribaPrev = false;
+  juego.reinicioPrev = false;
   juego.puntaje = 0;
   juego.vel = 2;
   juego.tProx = 30;
@@ -120,10 +122,13 @@ void dinoReset() {
   for (uint8_t i = 0; i < MAX_OBST; i++) juego.obst[i].activo = false;
 }
 
-// Avanza un frame del juego. 'arriba'/'abajo' son los estados ya filtrados.
-void dinoUpdate(bool arriba, bool abajo) {
+// Avanza un frame del juego. Estados ya filtrados. 'reiniciar' = boton B1 (SW1).
+void dinoUpdate(bool arriba, bool abajo, bool reiniciar) {
+  bool reinicioFlanco = (reiniciar && !juego.reinicioPrev);
+  juego.reinicioPrev = reiniciar;
+
   if (juego.gameOver) {
-    if (arriba && !juego.arribaPrev) dinoReset();   // reinicio por flanco de subida
+    if (reinicioFlanco) dinoReset();   // reinicio por flanco de subida de B1
     juego.arribaPrev = arriba;
     return;
   }
@@ -237,8 +242,8 @@ void dinoRender() {
   if (juego.gameOver) {
     oled.setCursor(34, 4);
     oled.print(F("GAME OVER"));
-    oled.setCursor(7, 14);
-    oled.print(F("arriba = reiniciar"));
+    oled.setCursor(16, 14);
+    oled.print(F("B1 = reiniciar"));
   }
 
   oled.display();
@@ -399,7 +404,7 @@ void loop() {
   static uint32_t tUltimoFrame = 0;
   if (oledOk && (ahora - tUltimoFrame >= FRAME_MS)) {
     tUltimoFrame = ahora;
-    dinoUpdate(estadoPrev[IDX_UP], estadoPrev[IDX_DOWN]);
+    dinoUpdate(estadoPrev[IDX_UP], estadoPrev[IDX_DOWN], estadoPrev[IDX_BTN[0]]);
     dinoRender();
   }
 }

@@ -192,6 +192,57 @@ void dinoUpdate(bool arriba, bool abajo) {
   // Animacion (cada 4 frames alterna).
   if (++juego.animCnt >= 4) { juego.animCnt = 0; juego.anim ^= 1; }
 }
+
+// Dibuja un frame del juego en la OLED.
+void dinoRender() {
+  oled.clearDisplay();
+  oled.drawFastHLine(0, GROUND_Y, 128, SSD1306_WHITE);   // suelo
+
+  // Dino.
+  if (juego.agachado) {
+    oled.drawBitmap(DINO_X, GROUND_Y - DUCK_H, DINO_DUCK, 16, 8, SSD1306_WHITE);
+  } else {
+    const uint8_t* spr = juego.anim ? DINO_B : DINO_A;
+    oled.drawBitmap(DINO_X, juego.posY >> 3, spr, 16, 16, SSD1306_WHITE);
+  }
+
+  // Obstaculos.
+  for (uint8_t i = 0; i < MAX_OBST; i++) {
+    if (!juego.obst[i].activo) continue;
+    int16_t ox = juego.obst[i].x;
+    if (juego.obst[i].tipo == 0) {                          // cactus
+      oled.fillRect(ox + 2, GROUND_Y - 12, 4, 12, SSD1306_WHITE);  // tronco
+      oled.fillRect(ox,     GROUND_Y - 8,  3, 2,  SSD1306_WHITE);  // brazo izq
+      oled.fillRect(ox + 5, GROUND_Y - 10, 3, 2,  SSD1306_WHITE);  // brazo der
+    } else {                                                // pajaro
+      int16_t by = GROUND_Y - 20;
+      oled.fillRect(ox + 4, by + 3, 8, 2, SSD1306_WHITE);          // cuerpo
+      if (juego.anim) {                                            // alas arriba
+        oled.drawLine(ox + 4,  by + 3, ox,      by,     SSD1306_WHITE);
+        oled.drawLine(ox + 11, by + 3, ox + 15, by,     SSD1306_WHITE);
+      } else {                                                     // alas abajo
+        oled.drawLine(ox + 4,  by + 4, ox,      by + 7, SSD1306_WHITE);
+        oled.drawLine(ox + 11, by + 4, ox + 15, by + 7, SSD1306_WHITE);
+      }
+    }
+  }
+
+  // Puntaje.
+  oled.setTextSize(1);
+  oled.setTextColor(SSD1306_WHITE);
+  oled.setCursor(98, 0);
+  oled.print(juego.puntaje);
+
+  // Game over.
+  if (juego.gameOver) {
+    oled.setCursor(34, 4);
+    oled.print(F("GAME OVER"));
+    oled.setCursor(7, 14);
+    oled.print(F("arriba = reiniciar"));
+  }
+
+  oled.display();
+}
 // ================================================================
 
 // Combina las 4 direcciones en un valor de hat (incluye diagonales).

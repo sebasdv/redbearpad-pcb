@@ -206,6 +206,13 @@ void loop() {
     int8_t dpad = calcularDpad(estadoPrev[IDX_UP], estadoPrev[IDX_DOWN],
                                estadoPrev[IDX_LEFT], estadoPrev[IDX_RIGHT]);
     Gamepad.dPad1(dpad);
+    // Tambien como stick izquierdo: la Gamepad API del navegador y casi todos los
+    // juegos leen el stick para moverse, pero NO interpretan el hat (dPad) como
+    // direccion. Se mapean las 4 direcciones a xAxis/yAxis con deflexion completa.
+    int16_t ejeX = (int16_t)(estadoPrev[IDX_RIGHT] ? 32767 : 0) - (int16_t)(estadoPrev[IDX_LEFT] ? 32767 : 0);
+    int16_t ejeY = (int16_t)(estadoPrev[IDX_DOWN]  ? 32767 : 0) - (int16_t)(estadoPrev[IDX_UP]   ? 32767 : 0);
+    Gamepad.xAxis(ejeX);
+    Gamepad.yAxis(ejeY);
     for (uint8_t b = 0; b < 4; b++) {
       if (estadoPrev[IDX_BTN[b]]) Gamepad.press(b + 1);
       else                        Gamepad.release(b + 1);

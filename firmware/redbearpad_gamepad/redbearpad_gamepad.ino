@@ -1,10 +1,12 @@
 /*
  * RedBearPad - Gamepad USB HID (8 switches) para Steam
+
  * Placa: RedBearLab Blend Micro V1.0 (ATmega32U4, core redbearlab:avr).
  * USAR SIEMPRE 8 MHz (blendmicro8): 16 MHz es overclock fuera de spec a 3.3 V.
  *
  * Enumera como gamepad HID generico. En Windows aparece en joy.cpl; en Steam se
  * configura con Steam Input.
+
  *
  * Mapeo (fijado por la PCB):
  *   Cruceta: SW2=Arriba(D8)  SW3=Izq(D9)  SW4=Abajo(D10)  SW5=Der(D11)
@@ -325,8 +327,7 @@ void setup() {
   }
 
   Wire.begin();
-  Wire.setWireTimeout(25000 /*us*/, true /*resetea el bus al expirar*/);
-  Wire.setClock(400000);  // SSD1306 soporta 400 kHz -> frames mas rapidos
+  Wire.setWireTimeout(25000 /*us*/, true /*resetea si el bus se traba*/);  // para el probe
 
   // Deteccion honesta de OLED: probar ACK por I2C antes de begin (Adafruit begin()
   // devuelve true aunque no haya pantalla). Probar 0x3C y, si falla, 0x3D.
@@ -334,6 +335,13 @@ void setup() {
   if (i2cResponde(0x3C))      oledAddr = 0x3C;
   else if (i2cResponde(0x3D)) oledAddr = 0x3D;
   oledOk = (oledAddr != 0) && oled.begin(SSD1306_SWITCHCAPVCC, oledAddr);
+
+  // CLAVE: oled.begin() llama internamente a Wire.begin()/setClock y PISA el timeout.
+  // Hay que reaplicar la config de Wire DESPUES, o un glitch de I2C cuelga el loop
+  // entero (sin timeout, el board se congela para siempre). 200 kHz: menos glitches que
+  // 400 con la OLED soldada a mano, y suficiente para ~30 FPS.
+  Wire.setWireTimeout(25000 /*us*/, true);
+  Wire.setClock(200000);
   if (oledOk) { oled.clearDisplay(); oled.display(); }  // sin dibujo aun
 
   uint32_t t0 = millis();

@@ -104,42 +104,44 @@ void escanearI2C() {
   if (n == 0) Serial.println(F("  nada respondio -> revisar SDA/SCL/VCC/GND o el modulo OLED"));
 }
 
-// Dibuja el estado del mando: direccion de la cruceta + botones 1..4 (resaltados).
+// Dibuja un brazo de la cruceta: relleno si esta pulsado, contorno si no.
+void dibujarArma(int16_t x, int16_t y, int16_t w, int16_t h, bool on) {
+  if (on) oled.fillRect(x, y, w, h, SSD1306_WHITE);
+  else    oled.drawRect(x, y, w, h, SSD1306_WHITE);
+}
+
+// Dibuja un boton circular con su numero: relleno (numero en negro) si pulsado.
+void dibujarBotonCirc(int16_t cx, int16_t cy, uint8_t num, bool on) {
+  if (on) {
+    oled.fillCircle(cx, cy, 6, SSD1306_WHITE);
+    oled.setTextColor(SSD1306_BLACK);
+  } else {
+    oled.drawCircle(cx, cy, 6, SSD1306_WHITE);
+    oled.setTextColor(SSD1306_WHITE);
+  }
+  oled.setCursor(cx - 2, cy - 3);
+  oled.print(num);
+}
+
+// Visualizador estilo mando: cruceta (izquierda) + 4 botones en diamante (derecha).
+// Los segmentos se encienden (se rellenan) segun el estado de los switches.
 void dibujarPantalla() {
   oled.clearDisplay();
   oled.setTextSize(1);
-  oled.setTextColor(SSD1306_WHITE);
-  oled.setCursor(0, 0);
-  oled.println(F("RedBearPad gamepad"));
 
-  int8_t d = calcularDpad(estadoPrev[IDX_UP], estadoPrev[IDX_DOWN],
-                          estadoPrev[IDX_LEFT], estadoPrev[IDX_RIGHT]);
-  const char* dir = "centro";
-  switch (d) {
-    case GAMEPAD_DPAD_UP:         dir = "arriba";  break;
-    case GAMEPAD_DPAD_DOWN:       dir = "abajo";   break;
-    case GAMEPAD_DPAD_LEFT:       dir = "izq";     break;
-    case GAMEPAD_DPAD_RIGHT:      dir = "der";     break;
-    case GAMEPAD_DPAD_UP_LEFT:    dir = "arr-izq"; break;
-    case GAMEPAD_DPAD_UP_RIGHT:   dir = "arr-der"; break;
-    case GAMEPAD_DPAD_DOWN_LEFT:  dir = "aba-izq"; break;
-    case GAMEPAD_DPAD_DOWN_RIGHT: dir = "aba-der"; break;
-  }
-  oled.setCursor(0, 12);
-  oled.print(F("Dir: ")); oled.print(dir);
+  // Cruceta: los brazos se encienden segun la direccion pulsada.
+  dibujarArma(18, 3,  8, 9, estadoPrev[IDX_UP]);     // arriba
+  dibujarArma(18, 20, 8, 9, estadoPrev[IDX_DOWN]);   // abajo
+  dibujarArma(6,  12, 9, 8, estadoPrev[IDX_LEFT]);   // izquierda
+  dibujarArma(29, 12, 9, 8, estadoPrev[IDX_RIGHT]);  // derecha
+  oled.drawRect(18, 12, 8, 8, SSD1306_WHITE);        // centro (hub)
 
-  for (uint8_t b = 0; b < 4; b++) {
-    bool on = estadoPrev[IDX_BTN[b]];
-    int16_t x = b * 32;
-    if (on) {
-      oled.fillRect(x, 23, 30, 9, SSD1306_WHITE);
-      oled.setTextColor(SSD1306_BLACK);
-    } else {
-      oled.setTextColor(SSD1306_WHITE);
-    }
-    oled.setCursor(x + 2, 24);
-    oled.print('B'); oled.print(b + 1);
-  }
+  // Botones de accion en diamante: izq=B1, abajo=B2, der=B3, arriba=B4.
+  dibujarBotonCirc(86,  16, 1, estadoPrev[IDX_BTN[0]]);
+  dibujarBotonCirc(100, 25, 2, estadoPrev[IDX_BTN[1]]);
+  dibujarBotonCirc(114, 16, 3, estadoPrev[IDX_BTN[2]]);
+  dibujarBotonCirc(100, 6,  4, estadoPrev[IDX_BTN[3]]);
+
   oled.display();
 }
 
@@ -160,6 +162,10 @@ void setup() {
   if (i2cResponde(0x3C))      oledAddr = 0x3C;
   else if (i2cResponde(0x3D)) oledAddr = 0x3D;
   oledOk = (oledAddr != 0) && oled.begin(SSD1306_SWITCHCAPVCC, oledAddr);
+
+  // oled.begin() llama internamente a Wire.begin() y PISA el timeout; reaplicarlo aqui
+  // para que un glitch de I2C aborte (25 ms) en vez de colgar el loop.
+  Wire.setWireTimeout(25000 /*us*/, true);
   if (oledOk) { oled.clearDisplay(); oled.display(); }  // sin dibujo aun
 
   uint32_t t0 = millis();

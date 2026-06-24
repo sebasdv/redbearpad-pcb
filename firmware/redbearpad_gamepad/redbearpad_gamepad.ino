@@ -130,7 +130,7 @@ void dinoUpdate(bool arriba, bool abajo, bool reiniciar) {
   juego.reinicioPrev = reiniciar;
 
   if (juego.gameOver) {
-    if (reinicioFlanco) { Serial.println(F("dino: reinicio (B1)")); dinoReset(); }   // flanco de B1
+    if (reinicioFlanco) { Serial.println(F("dino: reinicio")); dinoReset(); }   // flanco de un boton de accion
     juego.arribaPrev = arriba;
     return;
   }
@@ -245,8 +245,8 @@ void dinoRender() {
   if (juego.gameOver) {
     oled.setCursor(34, 4);
     oled.print(F("GAME OVER"));
-    oled.setCursor(16, 14);
-    oled.print(F("B1 = reiniciar"));
+    oled.setCursor(10, 14);
+    oled.print(F("boton = reiniciar"));
   }
 
   oled.display();
@@ -413,7 +413,9 @@ void loop() {
   static uint32_t tUltimoFrame = 0;
   if (oledOk && (ahora - tUltimoFrame >= FRAME_MS)) {
     tUltimoFrame = ahora;
-    dinoUpdate(estadoPrev[IDX_UP], estadoPrev[IDX_DOWN], estadoPrev[IDX_BTN[0]]);
+    bool botonAccion = estadoPrev[IDX_BTN[0]] || estadoPrev[IDX_BTN[1]] ||
+                       estadoPrev[IDX_BTN[2]] || estadoPrev[IDX_BTN[3]];
+    dinoUpdate(estadoPrev[IDX_UP], estadoPrev[IDX_DOWN], botonAccion);
     dinoRender();
   }
 }

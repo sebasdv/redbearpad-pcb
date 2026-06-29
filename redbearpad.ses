@@ -1,0 +1,175 @@
+(session try1
+  (base_design try1)
+  (placement
+    (resolution um 10)
+    (component "MountingHole_3.1mm"
+      (place H3 40000 -600000 front 0)
+      (place H1 40000 -40000 front 0)
+      (place H4 920000 -600000 front 0)
+      (place H2 920000 -40000 front 0)
+    )
+    (component "SW_Redragon_LowProfile_PCB_1.00u"
+      (place SW4 480000 -480000 front 0)
+      (place SW8 800000 -480000 front 0)
+      (place SW10 800000 -160000 front 0)
+      (place SW1 320000 -320000 front 0)
+      (place SW2 320000 -480000 front 0)
+      (place SW9 160000 -160000 front 0)
+      (place SW5 640000 -320000 front 0)
+      (place SW6 800000 -320000 front 0)
+      (place SW3 160000 -480000 front 0)
+      (place SW7 640000 -480000 front 0)
+    )
+    (component "SW_Tact_CAX_4.5x4.5"
+      (place SW12 640000 -160000 front 0)
+      (place SW11 320000 -160000 front 0)
+    )
+    (component "PinSocket_1x14_P2.54mm_Vertical"
+      (place J2 556200 -16670 back 0)
+      (place J1 403800 -16670 back 0)
+    )
+  )
+  (was_is
+  )
+  (routes 
+    (resolution um 10)
+    (parser
+      (host_cad "KiCad's Pcbnew")
+      (host_version "9.0.4")
+    )
+    (library_out 
+      (padstack "Via[0-1]_600:300_um"
+        (shape
+          (circle F.Cu 6000 0 0)
+        )
+        (shape
+          (circle B.Cu 6000 0 0)
+        )
+        (attach off)
+      )
+      (padstack "Via[0-1]_600:300_um"
+        (shape
+          (circle F.Cu 6000 0 0)
+        )
+        (shape
+          (circle B.Cu 6000 0 0)
+        )
+        (attach off)
+      )
+    )
+    (network_out 
+      (net SW1
+        (wire
+          (path F.Cu 2500
+            403800 -296070
+            358000 -341870
+            358000 -358000
+          )
+        )
+      )
+      (net SW2
+        (wire
+          (path B.Cu 2500
+            403800 -245270
+            420672 -262142
+            420672 -455328
+            358000 -518000
+          )
+        )
+      )
+      (net SW3
+        (wire
+          (path B.Cu 2500
+            403800 -270670
+            416081 -282951
+            416081 -351359
+            335657 -431783
+            284217 -431783
+            198000 -518000
+          )
+        )
+      )
+      (net SW4
+        (wire
+          (path B.Cu 2500
+            403800 -219870
+            518000 -334070
+            518000 -518000
+          )
+        )
+      )
+      (net SW5
+        (wire
+          (path B.Cu 2500
+            678000 -358000
+            618130 -358000
+            556200 -296070
+          )
+        )
+      )
+      (net SW6
+        (wire
+          (path F.Cu 2500
+            838000 -358000
+            720593 -358000
+            633263 -270670
+            556200 -270670
+          )
+        )
+      )
+      (net SW8
+        (wire
+          (path B.Cu 2500
+            556200 -194470
+            838000 -476270
+            838000 -518000
+          )
+        )
+      )
+      (net SW9
+        (wire
+          (path B.Cu 2500
+            403800 -346870
+            254930 -198000
+            198000 -198000
+          )
+        )
+      )
+      (net SW10
+        (wire
+          (path F.Cu 2500
+            838000 -198000
+            622470 -198000
+            562500 -257970
+            552224 -257970
+            544365 -265829
+            544365 -335035
+            556200 -346870
+          )
+        )
+      )
+      (net SW11
+        (wire
+          (path B.Cu 2500
+            403800 -321470
+            320001 -237671
+            320001 -157501
+            297500 -135000
+          )
+        )
+      )
+      (net SW12
+        (wire
+          (path B.Cu 2500
+            617500 -135000
+            570730 -181770
+            551376 -181770
+            544072 -189074
+            544072 -309342
+            556200 -321470
+          )
+        )
+      )
+    )
+  )
+)

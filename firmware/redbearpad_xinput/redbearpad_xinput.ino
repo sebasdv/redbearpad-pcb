@@ -30,6 +30,19 @@ const uint8_t SAMPLE_MS = 1;
 const uint8_t INTEGRADOR_MAX = 12;
 
 void setup() {
+  // --- Deshabilita el JTAG por software (CLAVE para X e Y) ---
+  // X=A0=PF7=TDI y Y=A1=PF6=TDO son pines del puerto JTAG del ATmega32U4.
+  // Si el JTAG queda activo (fuse JTAGEN), el TAP maneja/flota esos pines y no
+  // funcionan como GPIO limpio -> lecturas fantasma solo en X e Y. El bit JTD
+  // debe escribirse DOS veces dentro de 4 ciclos de reloj para que tome efecto.
+  {
+    uint8_t sreg = SREG;
+    cli();
+    MCUCR |= (1 << JTD);
+    MCUCR |= (1 << JTD);
+    SREG = sreg;
+  }
+
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     pinMode(PIN_BOTON[i], INPUT_PULLUP);
     estadoPrev[i] = false;

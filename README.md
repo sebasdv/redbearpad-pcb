@@ -21,7 +21,7 @@ el borde superior).
 
 ## ⚠️ Antes de pagar
 
-Medir con calibrador un switch real contra el footprint: poste central Ø4.4 mm
+Medir con pie de metro un switch real contra el footprint: poste central Ø4.4 mm
 en el centro; pines a (3.8, 3.8) y (0, 6.5) mm del centro, Ø1.2 mm. Si no
 coincide, ajustar `libs/redbearpad.pretty/SW_Redragon_LowProfile_PCB_1.00u.kicad_mod`
 y regenerar (`gen_pcb.py`).

@@ -11,8 +11,8 @@ borde superior). **Sin OLED** (eliminada respecto de la v1).
 
 ```
  L  Sel  ·  Sta  R       (fila y=16)   Sel/Sta = tact CAX
- ·  Up   ·   A   B       (fila y=32)
- LT Dn  Rt   X   Y       (fila y=48)   cruceta: Up arriba de Dn; Izq/Der en y=48
+ ·  Up   ·   X   Y       (fila y=32)
+ Iz Dn  Der  A   B       (fila y=48)   cruceta: Up arriba de Dn; Izq/Der en y=48
 ```
 
 ## Archivos
@@ -51,12 +51,22 @@ Verificar también el tact `SW_Tact_CAX_4.5x4.5` (cuerpo 4.5×4.5 mm, 4 patas).
 | Función | Pin Arduino | Botón XInput |
 |---|---|---|
 | Arriba / Abajo / Izquierda / Derecha | D3 / D1 / D2 / D0 | stick izq. + D-pad |
-| A / B / X / Y | D11 / D12 / A0 / A1 | A / B / X / Y |
+| X / Y (cara, fila superior) | D11 / D12 | X / Y |
+| A / B (cara, fila inferior) | A0 / A1 | A / B |
 | L / R | D8 / D9 | LB / RB |
 | Select / Start | D5 / D10 | BACK / START |
 
 Todas en `INPUT_PULLUP`, activas en bajo. La cruceta se manda como stick izquierdo
 **y** D-pad para máxima compatibilidad.
+
+Los 4 botones de cara forman un cuadrado 2×2, así que se asignan como el diamante
+Xbox girado 45°, respetando las cuatro relaciones de la convención (**Y arriba, A
+abajo, X izquierda, B derecha**):
+
+```
+ X  Y
+ A  B
+```
 
 ## Compilar y flashear (XInput)
 

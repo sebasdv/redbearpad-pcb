@@ -4,9 +4,18 @@
  * Sin serial (XInput no es CDC): LED 13 parpadea como "vivo".
  * Reflasheo: doble-reset manual para entrar al bootloader.
  *
- * Mapeo (contrato PCB v2). PIN_BOTON en orden de funcion:
- *   0:Arriba(D3) 1:Abajo(D1) 2:Izq(D2) 3:Der(D0) 4:A(D11) 5:B(D12)
- *   6:X(A0) 7:Y(A1) 8:L(D8) 9:R(D9) 10:Select(D5) 11:Start(D10)
+ * Mapeo (contrato PCB v2). PIN_BOTON en orden de indice fisico:
+ *   0:Arriba(D3,SW1) 1:Abajo(D1,SW2) 2:Izq(D2,SW3) 3:Der(D0,SW4)
+ *   4:SW5(D11) 5:SW6(D12) 6:SW7(A0) 7:SW8(A1)
+ *   8:L(D8,SW9) 9:R(D9,SW10) 10:Select(D5,SW11) 11:Start(D10,SW12)
+ *
+ * Los 4 botones de cara son un cuadrado 2x2 en la mitad derecha de la placa:
+ *   SW5 arriba-izq  SW6 arriba-der
+ *   SW7 abajo-izq   SW8 abajo-der
+ * Se asignan como el diamante Xbox girado 45 grados, de modo que se cumplan las
+ * cuatro relaciones de la convencion: Y arriba, A abajo, X izquierda, B derecha.
+ *   X Y
+ *   A B
  */
 #include <XInput.h>
 
@@ -21,6 +30,16 @@ const uint8_t SAMPLE_MS = 1;
 const uint8_t INTEGRADOR_MAX = 12;
 
 void setup() {
+  // --- TEST OVERCLOCK: baja el CPU a 8 MHz (en spec) sin tocar el PLL del USB ---
+  // El 32U4 a 16 MHz @ 3.3V esta fuera de spec y glitchea al calentar (botones vecinos
+  // se acoplan tras ~5 min). El USB se clockea del PLL (independiente del prescaler
+  // CLKPR), asi que el mando sigue enumerando como Xbox, pero el CPU pasa a 8 MHz y
+  // digitalRead deja de fallar.
+  // OJO (temporal): millis()/timing corren a la mitad -> heartbeat ~0.5 Hz, muestreo
+  // ~2 ms, debounce ~24 ms. Si el bounce desaparece, se hace variant 8 MHz definitivo.
+  CLKPR = 0x80;   // habilita el cambio de prescaler (hay 4 ciclos para el 2do write)
+  CLKPR = 0x01;   // prescaler /2 -> CPU 8 MHz
+
   for (uint8_t i = 0; i < NUM_BOTONES; i++) {
     pinMode(PIN_BOTON[i], INPUT_PULLUP);
     estadoPrev[i] = false;
@@ -53,10 +72,10 @@ void loop() {
     bool left = estadoPrev[IDX_LEFT], right = estadoPrev[IDX_RIGHT];
     XInput.setJoystick(JOY_LEFT, up, down, left, right);
     XInput.setDpad(up, down, left, right);
-    XInput.setButton(BUTTON_A,     estadoPrev[4]);
-    XInput.setButton(BUTTON_B,     estadoPrev[5]);
-    XInput.setButton(BUTTON_X,     estadoPrev[6]);
-    XInput.setButton(BUTTON_Y,     estadoPrev[7]);
+    XInput.setButton(BUTTON_X,     estadoPrev[4]);   // SW5 arriba-izq
+    XInput.setButton(BUTTON_Y,     estadoPrev[5]);   // SW6 arriba-der
+    XInput.setButton(BUTTON_A,     estadoPrev[6]);   // SW7 abajo-izq
+    XInput.setButton(BUTTON_B,     estadoPrev[7]);   // SW8 abajo-der
     XInput.setButton(BUTTON_LB,    estadoPrev[8]);
     XInput.setButton(BUTTON_RB,    estadoPrev[9]);
     XInput.setButton(BUTTON_BACK,  estadoPrev[10]);

@@ -54,20 +54,20 @@ while True:
 
 # ---------- placement ----------
 SW_FP = (LOCAL_LIB, "SW_Redragon_LowProfile_PCB_1.00u")
+TACT_FP = (LOCAL_LIB, "SW_Tact_CAX_4.5x4.5")
 S14 = (os.path.join(KICAD_FP, "Connector_PinSocket_2.54mm.pretty"),
        "PinSocket_1x14_P2.54mm_Vertical")
-S04 = (os.path.join(KICAD_FP, "Connector_PinSocket_2.54mm.pretty"),
-       "PinSocket_1x04_P2.54mm_Vertical")
 HOLE = (LOCAL_LIB, "MountingHole_3.1mm")
 
 PLACE = {
-    "SW1": (SW_FP, 16, 16, False), "SW2": (SW_FP, 32, 32, False),
-    "SW3": (SW_FP, 16, 48, False), "SW4": (SW_FP, 32, 48, False),
-    "SW5": (SW_FP, 48, 48, False), "SW6": (SW_FP, 64, 32, False),
-    "SW7": (SW_FP, 80, 32, False), "SW8": (SW_FP, 80, 48, False),
+    "SW1":  (SW_FP, 32, 32, False), "SW2":  (SW_FP, 32, 48, False),
+    "SW3":  (SW_FP, 16, 48, False), "SW4":  (SW_FP, 48, 48, False),
+    "SW5":  (SW_FP, 64, 32, False), "SW6":  (SW_FP, 80, 32, False),
+    "SW7":  (SW_FP, 64, 48, False), "SW8":  (SW_FP, 80, 48, False),
+    "SW9":  (SW_FP, 16, 16, False), "SW10": (SW_FP, 80, 16, False),
+    "SW11": (TACT_FP, 32, 16, False), "SW12": (TACT_FP, 64, 16, False),
     "J1": (S14, 40.38, 1.667, True),
     "J2": (S14, 55.62, 1.667, True),
-    "J3": (S04, 30.0, 9.7, False),
     "H1": (HOLE, 4, 4, False), "H2": (HOLE, 92, 4, False),
     "H3": (HOLE, 4, 60, False), "H4": (HOLE, 92, 60, False),
 }
@@ -111,15 +111,13 @@ def pad_at(ref, pin):
 def close(a, b, tol=0.01):
     return abs(a[0] - b[0]) < tol and abs(a[1] - b[1]) < tol
 
-assert close(pad_at("SW1", "1"), (19.8, 19.8)), pad_at("SW1", "1")
-assert close(pad_at("SW1", "2"), (16.0, 22.5)), pad_at("SW1", "2")
+assert close(pad_at("SW1", "1"), (35.8, 35.8)), pad_at("SW1", "1")
+assert close(pad_at("SW1", "2"), (32.0, 38.5)), pad_at("SW1", "2")
 assert close(pad_at("SW8", "1"), (83.8, 51.8)), pad_at("SW8", "1")
 assert close(pad_at("J1", "1"), (40.38, 1.667)), pad_at("J1", "1")
 assert close(pad_at("J1", "14"), (40.38, 34.687)), pad_at("J1", "14")
 assert close(pad_at("J2", "2"), (55.62, 4.207)), pad_at("J2", "2")
 assert close(pad_at("J2", "8"), (55.62, 19.447)), pad_at("J2", "8")
-assert close(pad_at("J3", "1"), (30.0, 9.7)), pad_at("J3", "1")
-assert close(pad_at("J3", "4"), (30.0, 17.32)), pad_at("J3", "4")
 assert fps["J1"].GetLayer() == pcbnew.B_Cu, "J1 debe estar en la cara inferior"
 assert fps["J2"].GetLayer() == pcbnew.B_Cu, "J2 debe estar en la cara inferior"
 
@@ -184,34 +182,15 @@ def npth_keepout(cx, cy, r, segs=32):
     board.Add(z)
 
 for ref, (_, x, y, _) in PLACE.items():
+    if ref in ("SW11", "SW12"):
+        continue                         # tact: sin agujero central grande
     if ref.startswith("SW"):
         npth_keepout(x, y, 2.6)          # agujero central 4.4 mm
     elif ref.startswith("H"):
         npth_keepout(x, y, 1.95)         # agujero de montaje 3.1 mm
 
 # ---------- pistas ----------
-TRACKS = [
-    # (net, capa, ancho_mm, [(x, y), ...])
-    # NW: SW1/SW2 entran a J1 por la izquierda; SDA F.Cu y SCL B.Cu.
-    ("SW1", pcbnew.F_Cu, 0.25, [(19.8, 19.8), (28, 27), (36, 30.5), (38.5, 32.147), (40.38, 32.147)]),
-    ("SW2", pcbnew.F_Cu, 0.25, [(35.8, 35.8), (39.2, 34.69), (40.38, 34.687)]),
-    # Flanco oeste de J2 (peine: pad mas bajo = corredor mas interno):
-    # SW3 -> J2.14 por x=54.3, SW4 -> J2.13 por x=53.5, SW5 -> J2.12 por x=52.7.
-    ("SW3", pcbnew.F_Cu, 0.25, [(19.8, 51.8), (23, 56.2), (54.3, 56.2), (54.3, 34.687), (55.62, 34.687)]),
-    ("SW4", pcbnew.F_Cu, 0.25, [(35.8, 51.8), (45.9, 51.15), (53.5, 54.95), (53.5, 32.147), (55.62, 32.147)]),
-    ("SW5", pcbnew.F_Cu, 0.25, [(51.8, 51.8), (52.7, 48), (52.7, 31), (55.62, 29.607)]),
-    # Flanco este de J2 (peine: pad mas bajo = corredor mas interno):
-    # SW6 -> J2.11 por x=57.5, SW7 -> J2.9 por x=58.3, SW8 -> J2.8 por x=59.1.
-    ("SW6", pcbnew.F_Cu, 0.25, [(67.8, 35.8), (70.5, 33), (70.5, 29.2), (57.5, 29.2), (57.5, 27.067), (55.62, 27.067)]),
-    ("SW7", pcbnew.F_Cu, 0.25, [(83.8, 35.8), (83.8, 28), (58.3, 28), (58.3, 21.987), (55.62, 21.987)]),
-    ("SW8", pcbnew.F_Cu, 0.25, [(83.8, 51.8), (88, 48), (88, 24), (59.1, 24), (59.1, 19.447), (55.62, 19.447)]),
-    # OLED J3 reordenado (pin1=SDA y=9.7, pin2=SCL y=12.24, pin3=+3V3 y=14.78, pin4=GND y=17.32).
-    ("SDA", pcbnew.F_Cu, 0.25, [(30, 9.7), (35, 16), (38.5, 27.067), (40.38, 27.067)]),
-    # SCL sale casi horizontal para despejar el pad +3V3 de abajo antes de bajar.
-    ("SCL", pcbnew.B_Cu, 0.25, [(30, 12.24), (36, 13.5), (38, 29.607), (40.38, 29.607)]),
-    # +3V3 entera en B.Cu: rodea por el sur (y=40.6) y sube por x=58.5 hasta J2.2.
-    ("+3V3", pcbnew.B_Cu, 0.5, [(30, 14.78), (27.5, 16.5), (27.5, 40.6), (58.5, 40.6), (58.5, 4.207), (55.62, 4.207)]),
-]
+TRACKS = []  # se rutea en la Task 6
 for net, layer, width, pts in TRACKS:
     for a, b in zip(pts, pts[1:]):
         t = pcbnew.PCB_TRACK(board)
@@ -240,8 +219,6 @@ for ref, (_, x, y, _) in PLACE.items():
     if ref.startswith("SW"):
         lx, ly = SILK_SW.get(ref, (x, y - 8.2))
         silk(ref, lx, ly, size=1.0)
-for lbl, py in (("SDA", 9.7), ("SCL", 12.24), ("VCC", 14.78), ("GND", 17.32)):
-    silk(lbl, 26.0, py, size=0.9)
 
 def silk_line(x1, y1, x2, y2, layer):
     s = pcbnew.PCB_SHAPE(board)

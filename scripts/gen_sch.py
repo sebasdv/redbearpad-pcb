@@ -84,12 +84,11 @@ sw_pins = pin_map(sw_blk)
 c14_pins = pin_map(c14_blk)
 c04_pins = pin_map(c04_blk)
 
-J1_NETS = ["GND", "GND", None, None, None, None, None, None, None, None,
-           "SDA", "SCL", "SW1", "SW2"]
-J2_NETS = ["GND", "+3V3", None, None, None, None, None, "SW8", "SW7", None,
-           "SW6", "SW5", "SW4", "SW3"]
-# Orden fisico del modulo OLED comprado: pin 1 = SDA ... pin 4 = GND.
-J3_NETS = ["SDA", "SCL", "+3V3", "GND"]
+# 12 entradas (sin OLED). Cada SWn a su pin de header segun el contrato v2.
+J1_NETS = ["GND", "GND", None, None, None, None, None, None,
+           "SW4", "SW2", "SW3", "SW1", "SW11", "SW9"]
+J2_NETS = ["GND", None, None, None, None, None, None, "SW8",
+           "SW7", None, "SW6", "SW5", "SW12", "SW10"]
 
 body = []
 
@@ -107,12 +106,15 @@ def place_conn(ref, value, fp, lib_id, pins, nets, x, y):
 # Reset counter for deterministic UUID generation
 _uuid_counter = 0
 
-for k in range(8):
+SW_FP_MX   = "redbearpad:SW_Redragon_LowProfile_PCB_1.00u"
+SW_FP_TACT = "redbearpad:SW_Tact_CAX_4.5x4.5"
+TACT_REFS = {"SW11", "SW12"}
+for k in range(12):
     ref = "SW%d" % (k + 1)
     x, y = 63.5, 25.4 + 15.24 * k
-    body.append(sym_instance("Switch:SW_Push", ref, "Redragon_LP",
-                             "redbearpad:SW_Redragon_LowProfile_PCB_1.00u",
-                             x, y, ["1", "2"]))
+    fp = SW_FP_TACT if ref in TACT_REFS else SW_FP_MX
+    body.append(sym_instance("Switch:SW_Push", ref, "Tact_CAX" if ref in TACT_REFS else "Redragon_LP",
+                             fp, x, y, ["1", "2"]))
     for num, net in (("1", ref), ("2", "GND")):
         px, py = sw_pins[num]
         body.append(glabel(net, x + px, y - py, left=px < 0))
@@ -123,9 +125,6 @@ place_conn("J1", "BlendMicro_fila_izq",
 place_conn("J2", "BlendMicro_fila_der",
            "Connector_PinSocket_2.54mm:PinSocket_1x14_P2.54mm_Vertical",
            "Connector_Generic:Conn_01x14", c14_pins, J2_NETS, 203.2, 63.5)
-place_conn("J3", "OLED_128x32_I2C",
-           "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical",
-           "Connector_Generic:Conn_01x04", c04_pins, J3_NETS, 101.6, 152.4)
 
 sch = f"""(kicad_sch (version 20231120) (generator "gen_sch")
   (uuid "{ROOT_UUID}")

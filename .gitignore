@@ -7,3 +7,7 @@ __pycache__/
 drc.json
 firmware/*.rar
 WhatsApp Image*
+# Artefactos regenerables de KiCad / sesiones de debug
+logs/
+*-erc.rpt
+redbearpad_actual_MOD.dxf

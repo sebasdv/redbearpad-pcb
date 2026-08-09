@@ -89,21 +89,28 @@ abajo, X izquierda, B derecha**):
 - **Blend Micro**: modelo real modelado por el usuario en Fusion 360 — PCB
   roja con los dos headers de 14 pines y un conector micro-USB detallado,
   que asoma por el borde superior de la placa tal como en la física real.
-  El footprint usa `libs/redbearpad.3dshapes/BlendMicro_Module_V1_mirrored.step`
-  (no el `_V1.step` original: hubo que espejarlo en X y ese archivo es el
-  resultado). El mirror se hizo con `scripts/mirror_blendmicro_step.py`
-  (CadQuery/OCC, reflexión geométrica real vía `Shape.mirror`) en vez del
-  `scale (xyz -1 1 1)` que ofrece el bloque `(model ...)` de KiCad: esa
-  negación de escala invierte la orientación de las caras del sólido y el
-  renderer las descarta (probado — el cuerpo del PCB desaparecía casi
-  entero, solo quedaba un borde degenerado). El header del propio modulo
-  reutiliza dos veces `PinHeader_1x14_P2.54mm.step` (ver abajo), más un
-  conector USB de otra fuente.
+  El footprint usa el `BlendMicro_Module_V1.step` **original**, con
+  `rotate (xyz 0 180 0)` en el bloque `(model ...)`: el modulo necesitaba
+  dos correcciones (mirror en X para que el header quedara en el lado
+  correcto, y flip en Z porque los pines apuntaban hacia afuera en vez de
+  hacia J1/J2) y espejar en dos ejes distintos equivale matematicamente a
+  una sola rotacion de 180° sobre Y — mas simple y sin el riesgo de una
+  reflexion pura (ver mas abajo). El header del propio modulo reutiliza dos
+  veces `PinHeader_1x14_P2.54mm.step` (ver abajo), mas un conector USB de
+  otra fuente.
   Footprint sin pads (`BlendMicro_Module`, ref `BLENDMICRO1`): la conexión
   eléctrica real la hacen J1/J2 — sus modelos 3D de fábrica (socket hembra)
   se limpiaron (`fp.Models().clear()`, también en `gen_pcb.py` para que una
   regeneración futura no los reponga) porque quedaban duplicados sobre los
   headers que ya trae el modelo de la Blend Micro.
+  `scripts/mirror_blendmicro_step.py` (CadQuery/OCC, reflexión geométrica
+  real vía `Shape.mirror`) quedó sin usar pero documentado como referencia:
+  es la técnica correcta para espejar un sólido B-rep en **un solo eje** (lo
+  que la rotación de arriba no puede lograr). Se probó primero el camino
+  obvio para el mirror en X — `scale (xyz -1 1 1)` en el bloque
+  `(model ...)` — y falló: esa negación de escala invierte la orientación de
+  las caras del sólido y el renderer las descarta (el cuerpo del PCB
+  desaparecía casi entero, solo quedaba un borde degenerado).
   `libs/redbearpad.3dshapes/BlendMicro_Module.step` (placa plana sin
   detalle, generada con `scripts/gen_blendmicro_step.py` a partir del DXF
   oficial) queda como **fallback** por si se pierde el modelo real.

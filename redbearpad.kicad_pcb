@@ -3844,7 +3844,7 @@
 			(uuid "9f732bf6-b2b7-4eb0-9f99-59cb9b1456f8")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module_V1_mirrored.step"
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module_V1.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -3852,7 +3852,7 @@
 				(xyz 1 1 1)
 			)
 			(rotate
-				(xyz 0 0 0)
+				(xyz 0 180 0)
 			)
 		)
 	)

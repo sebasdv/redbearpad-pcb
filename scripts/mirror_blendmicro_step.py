@@ -1,4 +1,19 @@
-"""Espeja BlendMicro_Module_V1.step en el eje X (mirror izquierda/derecha),
+"""SUPERADO (2026-08-09): al final no hizo falta. El footprint necesitaba DOS
+correcciones (mirror en X para el header L/R, Y flip en Z porque los pines
+apuntaban al lado equivocado) y espejar en dos ejes distintos equivale
+matematicamente a UNA rotacion de 180 grados sobre el eje Y (dos reflexiones
+= una rotacion). Las rotaciones son seguras en KiCad (no invierten normales
+de cara como una reflexion), asi que el fix final quedo en
+BlendMicro_Module.kicad_mod: `rotate (xyz 0 180 0)` sobre el
+BlendMicro_Module_V1.step ORIGINAL, sin este script ni su salida
+(BlendMicro_Module_V1_mirrored.step, borrada del repo por peso muerto -- 4.6
+MB sin uso). Se conserva este script como referencia: la tecnica de
+reflexion geometrica real via CadQuery/OCC SIGUE siendo la forma correcta de
+espejar un solido B-rep en un SOLO eje (algo que una rotacion no puede
+lograr, porque una rotacion pura nunca cambia la quiralidad/orientacion de
+un objeto).
+
+Espeja BlendMicro_Module_V1.step en el eje X (mirror izquierda/derecha),
 preservando nombres y colores de cada sub-parte.
 
 Por que no un simple `scale (xyz -1 1 1)` en el bloque (model ...) del

@@ -3,7 +3,7 @@
 	(generator "manual")
 	(generator_version "9.0")
 	(layer "B.Cu")
-	(descr "Representacion visual (sin pads) del modulo RedBearLab Blend Micro V1.0 enchufado en J1/J2. Medidas reales del DXF oficial del fabricante: 18.4x42.087mm. No lleva conexion electrica: la conectan J1/J2.")
+	(descr "Representacion visual (sin pads) del modulo RedBearLab Blend Micro V1.0 enchufado en J1/J2. Modelo 3D real modelado por el usuario (BlendMicro_Module_V1.step). No lleva conexion electrica: la conectan J1/J2.")
 	(tags "RedBearLab Blend Micro visual placeholder no-connect")
 	(attr exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 	(property "Reference" "REF**"
@@ -42,7 +42,7 @@
 		(uuid "b1000001-0000-0000-0000-000000000004")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module.step"
+	(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module_V1.step"
 		(offset
 			(xyz 0 0 0)
 		)

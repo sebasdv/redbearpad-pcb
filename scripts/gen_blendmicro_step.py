@@ -1,4 +1,10 @@
-"""Genera un STEP simplificado de la Blend Micro: una placa plana con las
+"""SUPERADO (2026-08-09): BlendMicro_Module.kicad_mod ahora usa
+BlendMicro_Module_V1.step, un modelo real modelado por el usuario (con
+conector USB, headers y PCB roja detallada). Este script y su salida
+(BlendMicro_Module.step) quedan como fallback/referencia -- por si se pierde
+el modelo real o hace falta una version liviana para pruebas rapidas.
+
+Genera un STEP simplificado de la Blend Micro: una placa plana con las
 medidas y esquinas REALES extraidas de `blend-micro-boards/upstream/Blend/PCB/
 Blend_Micro.dxf` (el DXF oficial del fabricante), NO un render detallado del
 modulo (sin componentes, sin conector USB, sin headers). Sirve como

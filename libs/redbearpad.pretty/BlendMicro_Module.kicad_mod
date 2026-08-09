@@ -42,7 +42,7 @@
 		(uuid "b1000001-0000-0000-0000-000000000004")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module_V1.step"
+	(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module_V1_mirrored.step"
 		(offset
 			(xyz 0 0 0)
 		)

@@ -3844,7 +3844,7 @@
 			(uuid "9f732bf6-b2b7-4eb0-9f99-59cb9b1456f8")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module_V1.step"
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module_V1_mirrored.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -4197,17 +4197,6 @@
 			(uuid "9cb18399-d187-4f7f-b885-34e0df506ed9")
 		)
 		(embedded_fonts no)
-		(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x14_P2.54mm_Vertical.step"
-			(offset
-				(xyz 0 0 0)
-			)
-			(scale
-				(xyz 1 1 1)
-			)
-			(rotate
-				(xyz 0 0 0)
-			)
-		)
 	)
 	(footprint "PinSocket_1x14_P2.54mm_Vertical"
 		(layer "B.Cu")
@@ -4551,17 +4540,6 @@
 			(uuid "576fff03-d013-42e5-a3e4-a07935922986")
 		)
 		(embedded_fonts no)
-		(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x14_P2.54mm_Vertical.step"
-			(offset
-				(xyz 0 0 0)
-			)
-			(scale
-				(xyz 1 1 1)
-			)
-			(rotate
-				(xyz 0 0 0)
-			)
-		)
 	)
 	(gr_line
 		(start 38.8 0.2)

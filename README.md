@@ -86,17 +86,31 @@ abajo, X izquierda, B derecha**):
 
 - **Switches Redragon MX Low Profile** (los 10): modelo real
   (`libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step`), rotado 180°.
-- **Blend Micro**: modelo real modelado por el usuario
-  (`libs/redbearpad.3dshapes/BlendMicro_Module_V1.step`) — PCB roja con los
-  dos headers de 14 pines y el conector micro-USB, que asoma por el borde
-  superior de la placa tal como en la física real. Footprint sin pads
-  (`BlendMicro_Module`, ref `BLENDMICRO1`): la conexión eléctrica real la
-  hacen J1/J2, esto es solo para el visor 3D. Se descartó usar un modelo de
-  Arduino Micro porque no calza en tamaño (48×18 mm vs los 42.09×18.4 mm
-  reales de la Blend Micro — 14% más largo).
+- **Blend Micro**: modelo real modelado por el usuario en Fusion 360 — PCB
+  roja con los dos headers de 14 pines y un conector micro-USB detallado,
+  que asoma por el borde superior de la placa tal como en la física real.
+  El footprint usa `libs/redbearpad.3dshapes/BlendMicro_Module_V1_mirrored.step`
+  (no el `_V1.step` original: hubo que espejarlo en X y ese archivo es el
+  resultado). El mirror se hizo con `scripts/mirror_blendmicro_step.py`
+  (CadQuery/OCC, reflexión geométrica real vía `Shape.mirror`) en vez del
+  `scale (xyz -1 1 1)` que ofrece el bloque `(model ...)` de KiCad: esa
+  negación de escala invierte la orientación de las caras del sólido y el
+  renderer las descarta (probado — el cuerpo del PCB desaparecía casi
+  entero, solo quedaba un borde degenerado). El header del propio modulo
+  reutiliza dos veces `PinHeader_1x14_P2.54mm.step` (ver abajo), más un
+  conector USB de otra fuente.
+  Footprint sin pads (`BlendMicro_Module`, ref `BLENDMICRO1`): la conexión
+  eléctrica real la hacen J1/J2 — sus modelos 3D de fábrica (socket hembra)
+  se limpiaron (`fp.Models().clear()`, también en `gen_pcb.py` para que una
+  regeneración futura no los reponga) porque quedaban duplicados sobre los
+  headers que ya trae el modelo de la Blend Micro.
   `libs/redbearpad.3dshapes/BlendMicro_Module.step` (placa plana sin
   detalle, generada con `scripts/gen_blendmicro_step.py` a partir del DXF
   oficial) queda como **fallback** por si se pierde el modelo real.
+- **Regleta macho 1x14** (`libs/redbearpad.3dshapes/PinHeader_1x14_P2.54mm.step`,
+  generada con `scripts/gen_pinheader_1x14.py`): no está enlazada a ningún
+  footprint propio del proyecto, pero **sí se usa** — está incrustada dos
+  veces dentro de `BlendMicro_Module_V1.step` (una por fila de header).
 - **Pendiente:** modelo del tact CAX C39832249 (Start/Select). No hay STEP
   disponible todavía.
 

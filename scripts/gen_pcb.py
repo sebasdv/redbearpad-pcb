@@ -90,6 +90,13 @@ for ref, ((lib, fpname), x, y, flip) in PLACE.items():
     fp = pcbnew.FootprintLoad(lib, fpname)
     assert fp is not None, (lib, fpname)
     fp.SetReference(ref)
+    if ref in ("J1", "J2"):
+        # BlendMicro_Module_V1_mirrored.step ya incluye sus propios headers
+        # modelados; el modelo de fabrica del PinSocket queda redundante y
+        # duplicado visualmente si se deja (se probo, quedaba superpuesto).
+        # Se limpia aca en vez de editar el .kicad_mod de la libreria del
+        # sistema de KiCad (compartida con otros proyectos).
+        fp.Models().clear()
     board.Add(fp)
     if flip:
         # KiCad 9: el espejo izq-der deja la orientacion en 180 y las Y de los

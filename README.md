@@ -84,11 +84,26 @@ abajo, X izquierda, B derecha**):
 
 ## Modelos 3D
 
-Los 10 switches Redragon MX Low Profile tienen modelo 3D
-(`libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step`), visible en
-`docs/render_*.png` y en el visor 3D de KiCad. **Pendiente:** modelo del tact CAX
-C39832249 (Start/Select) y de la Blend Micro (el módulo enchufable no tiene
-representación 3D, solo los zócalos J1/J2 vacíos).
+- **Switches Redragon MX Low Profile** (los 10): modelo real
+  (`libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step`), rotado 180°.
+- **Blend Micro**: no hay STEP del fabricante, así que es un **placeholder**: una
+  placa plana de 18.4×42.087 mm con esquinas a R=1.42 mm, medidas extraídas del
+  DXF oficial (`blend-micro-boards/upstream/Blend/PCB/Blend_Micro.dxf`, capa
+  `BOARD_OUTLINE_00`). El grosor (1.6 mm) es un estándar asumido, no verificado
+  contra el DXF (que es 2D). Generado con `scripts/gen_blendmicro_step.py`
+  (requiere `pip install cadquery`); se descartó usar un modelo de Arduino
+  Micro porque no calza en tamaño (48×18 mm vs los 42.09×18.4 mm reales de la
+  Blend Micro — 14% más largo). Footprint sin pads
+  (`BlendMicro_Module`, ref `BLENDMICRO1`): la conexión eléctrica real la
+  hacen J1/J2, esto es solo para el visor 3D.
+- **Pendiente:** modelo del tact CAX C39832249 (Start/Select). No hay STEP
+  disponible todavía.
+
+Ambos modelos ya adjuntos y visibles en `docs/render_*.png` y en el visor 3D de
+KiCad. Al regenerar con `gen_pcb.py` se colocan solos (viven en las librerías);
+si se rutea a mano sobre un board existente, usar `scripts/attach_3d_models.py`
+(switches) o `scripts/insert_blendmicro_footprint.py` (Blend Micro) para no
+perder el ruteo.
 
 ## Créditos
 

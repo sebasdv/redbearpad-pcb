@@ -58,6 +58,7 @@ TACT_FP = (LOCAL_LIB, "SW_Tact_CAX_4.5x4.5")
 S14 = (os.path.join(KICAD_FP, "Connector_PinSocket_2.54mm.pretty"),
        "PinSocket_1x14_P2.54mm_Vertical")
 HOLE = (LOCAL_LIB, "MountingHole_3.1mm")
+BLENDMICRO_FP = (LOCAL_LIB, "BlendMicro_Module")
 
 PLACE = {
     "SW1":  (SW_FP, 32, 32, False), "SW2":  (SW_FP, 32, 48, False),
@@ -70,6 +71,10 @@ PLACE = {
     "J2": (S14, 55.62, 1.667, True),
     "H1": (HOLE, 4, 4, False), "H2": (HOLE, 92, 4, False),
     "H3": (HOLE, 4, 60, False), "H4": (HOLE, 92, 60, False),
+    # Placeholder visual (sin pads, sin nets) del modulo Blend Micro enchufado
+    # en J1/J2; ver libs/redbearpad.pretty/BlendMicro_Module.kicad_mod. NO se
+    # flipea: el footprint ya se autoria nativo en B.Cu.
+    "BLENDMICRO1": (BLENDMICRO_FP, 48.0, 21.044, False),
 }
 
 board = pcbnew.NewBoard(PCB)

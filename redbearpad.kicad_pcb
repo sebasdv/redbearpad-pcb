@@ -3777,6 +3777,85 @@
 		)
 		(embedded_fonts no)
 	)
+	(footprint "BlendMicro_Module"
+		(layer "B.Cu")
+		(uuid "08c675d6-b331-4c58-b709-625d18371408")
+		(at 48 21.044)
+		(descr "Representacion visual (sin pads) del modulo RedBearLab Blend Micro V1.0 enchufado en J1/J2. Medidas reales del DXF oficial del fabricante: 18.4x42.087mm. No lleva conexion electrica: la conectan J1/J2.")
+		(tags "RedBearLab Blend Micro visual placeholder no-connect")
+		(property "Reference" "BLENDMICRO1"
+			(at 0 -23.5 0)
+			(layer "B.SilkS")
+			(uuid "a0c1d881-3cb5-453c-8133-75bae393d76d")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify mirror)
+			)
+		)
+		(property "Value" "BlendMicro_Module"
+			(at 0 23.5 0)
+			(layer "B.Fab")
+			(uuid "648931f1-f16f-49e2-9b7d-3b1ef97ba0c7")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify mirror)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "d14eb727-0656-408e-ae33-0b5de7e1af62")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "215597a4-0e9b-45bf-9ce1-0faf71c7bd6c")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
+		(fp_rect
+			(start -9.2 -21.044)
+			(end 9.2 21.044)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "B.Fab")
+			(uuid "9f732bf6-b2b7-4eb0-9f99-59cb9b1456f8")
+		)
+		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
+	)
 	(footprint "PinSocket_1x14_P2.54mm_Vertical"
 		(layer "B.Cu")
 		(uuid "91ec63b9-42e9-4bf2-97d4-e337c8e109bb")

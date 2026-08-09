@@ -23,8 +23,13 @@ borde superior). **Sin OLED** (eliminada respecto de la v1).
   (ejecutar con el Python de KiCad: `...\KiCad\9.0\bin\python.exe`).
   ⚠️ Regenerar el PCB **borra el ruteo**; el ruteo actual está en el `.kicad_pcb` versionado.
 - `scripts/verify_netlist.py` — valida el netlist contra el contrato de diseño (12 entradas).
+- `scripts/attach_3d_models.py` — adjunta modelos 3D a los footprints ya colocados en el
+  `.kicad_pcb` **sin regenerar la placa** (a diferencia de `gen_pcb.py`, no toca el ruteo).
+  Solo hace falta si se rutea a mano sobre un board viejo sin modelos; una regeneración
+  completa con `gen_pcb.py` ya los trae, porque viven en el `.kicad_mod` de la librería.
 - `fabrication/gerbers/` — Gerbers + drill (F.Cu, B.Cu, Edge_Cuts, NPTH/PTH) regenerados.
 - `docs/superpowers/specs/` — diseño aprobado de la v2.
+- `docs/render_top.png`, `docs/render_bottom.png` — vistas previas 3D (`kicad-cli pcb render`).
 
 ## Ruteo
 
@@ -77,7 +82,16 @@ abajo, X izquierda, B derecha**):
 - XInput **no es CDC**: no hay Serial Monitor (LED 13 hace heartbeat). Para
   reflashear, hacer **doble-reset manual** para entrar al bootloader.
 
+## Modelos 3D
+
+Los 10 switches Redragon MX Low Profile tienen modelo 3D
+(`libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step`), visible en
+`docs/render_*.png` y en el visor 3D de KiCad. **Pendiente:** modelo del tact CAX
+C39832249 (Start/Select) y de la Blend Micro (el módulo enchufable no tiene
+representación 3D, solo los zócalos J1/J2 vacíos).
+
 ## Créditos
 
 Footprint del switch: [rgoulter/keyboard-labs](https://github.com/rgoulter/keyboard-labs).
+Modelo 3D del switch: librería "Switches/REDragon_MX_LowProfile_ZT04" (autor "saper").
 Core/librería XInput: [dmadison/ArduinoXInput](https://github.com/dmadison/ArduinoXInput).

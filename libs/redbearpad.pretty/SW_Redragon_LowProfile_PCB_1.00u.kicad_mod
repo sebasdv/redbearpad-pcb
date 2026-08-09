@@ -288,4 +288,15 @@
 		(uuid "86d648ea-bd9b-487c-b206-03d0f90e93d8")
 	)
 	(embedded_fonts no)
+	(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )

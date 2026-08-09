@@ -458,6 +458,17 @@
 			(uuid "01fd532e-5f7b-4207-937f-5e160cc7d5e0")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "MountingHole_3.1mm"
 		(layer "F.Cu")
@@ -826,6 +837,17 @@
 			(uuid "c74f5f02-7eec-40cc-ad8d-4431035b53e8")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "MountingHole_3.1mm"
 		(layer "F.Cu")
@@ -1194,6 +1216,17 @@
 			(uuid "cdf91b94-3c3f-441d-9dd0-19d6bdcf3ad6")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "SW_Redragon_LowProfile_PCB_1.00u"
 		(layer "F.Cu")
@@ -1488,6 +1521,17 @@
 			(uuid "34313d48-63f6-49f9-a1e9-61538fa70853")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "SW_Redragon_LowProfile_PCB_1.00u"
 		(layer "F.Cu")
@@ -1782,6 +1826,17 @@
 			(uuid "d5c557ba-f3b7-45af-a41f-a2160ac639ee")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "SW_Redragon_LowProfile_PCB_1.00u"
 		(layer "F.Cu")
@@ -2076,6 +2131,17 @@
 			(uuid "781077cd-49d7-4ed1-be9a-3820e1223983")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "SW_Redragon_LowProfile_PCB_1.00u"
 		(layer "F.Cu")
@@ -2370,6 +2436,17 @@
 			(uuid "aa67bede-a386-4daf-94b2-e09c31d49294")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "SW_Redragon_LowProfile_PCB_1.00u"
 		(layer "F.Cu")
@@ -2664,6 +2741,17 @@
 			(uuid "528cc04c-0365-4779-9505-2412b712c87a")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "MountingHole_3.1mm"
 		(layer "F.Cu")
@@ -3202,6 +3290,17 @@
 			(uuid "8ef9187b-4131-43dd-8dd6-776a9a726752")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "SW_Redragon_LowProfile_PCB_1.00u"
 		(layer "F.Cu")
@@ -3496,6 +3595,17 @@
 			(uuid "7b5502ab-c5de-425b-ad97-07c321c6613e")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "SW_Tact_CAX_4.5x4.5"
 		(layer "F.Cu")

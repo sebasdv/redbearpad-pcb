@@ -44,7 +44,7 @@
 	(embedded_fonts no)
 	(model "${KIPRJMOD}/libs/redbearpad.3dshapes/BlendMicro_Module_V1.step"
 		(offset
-			(xyz 0 0 0)
+			(xyz 0 0 -4.10)
 		)
 		(scale
 			(xyz 1 1 1)

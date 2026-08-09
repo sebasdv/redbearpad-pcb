@@ -19,7 +19,7 @@ PCB = os.path.join(ROOT, "redbearpad.kicad_pcb")
 MODELS = {
     "SW": (
         "${KIPRJMOD}/libs/redbearpad.3dshapes/SW_Redragon_LowProfile_PCB_1.00u.step",
-        (0, 0, 0), (1, 1, 1), (0, 0, 0),
+        (0, 0, 0), (1, 1, 1), (0, 0, 180),
     ),
 }
 # Los tact (SW11, SW12) usan un footprint distinto sin modelo disponible todavia;
@@ -27,25 +27,33 @@ MODELS = {
 TACT_REFS = {"SW11", "SW12"}
 
 board = pcbnew.LoadBoard(PCB)
-changed = []
-skipped = []
+added = []
+updated = []
 
 for fp in board.GetFootprints():
     ref = fp.GetReference()
     if not ref.startswith("SW") or ref in TACT_REFS:
         continue
-    if fp.Models().size() > 0:
-        skipped.append(ref)
-        continue
     path, offset, scale, rot = MODELS["SW"]
-    m = pcbnew.FP_3DMODEL()
-    m.m_Filename = path
-    m.m_Offset = pcbnew.VECTOR3D(*offset)
-    m.m_Scale = pcbnew.VECTOR3D(*scale)
-    m.m_Rotation = pcbnew.VECTOR3D(*rot)
-    fp.Models().push_back(m)
-    changed.append(ref)
+    models = fp.Models()
+    # OJO: iterar `models` (VECTOR_FP_3DMODEL, wrapper SWIG de std::vector) da copias
+    # por valor -- mutar el objeto obtenido en el for-loop NO se propaga al vector real.
+    # Hay que indexar con models[i] para escribir sobre el elemento de verdad.
+    idx = next((i for i in range(models.size()) if models[i].m_Filename == path), None)
+    if idx is not None:
+        models[idx].m_Offset = pcbnew.VECTOR3D(*offset)
+        models[idx].m_Scale = pcbnew.VECTOR3D(*scale)
+        models[idx].m_Rotation = pcbnew.VECTOR3D(*rot)
+        updated.append(ref)
+    else:
+        m = pcbnew.FP_3DMODEL()
+        m.m_Filename = path
+        m.m_Offset = pcbnew.VECTOR3D(*offset)
+        m.m_Scale = pcbnew.VECTOR3D(*scale)
+        m.m_Rotation = pcbnew.VECTOR3D(*rot)
+        fp.Models().push_back(m)
+        added.append(ref)
 
 board.Save(PCB)
-print("Modelo adjuntado a:", sorted(changed))
-print("Ya tenian modelo (sin tocar):", sorted(skipped))
+print("Modelo agregado nuevo en:", sorted(added))
+print("Modelo actualizado (offset/escala/rotacion) en:", sorted(updated))

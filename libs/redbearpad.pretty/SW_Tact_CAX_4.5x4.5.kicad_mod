@@ -135,4 +135,15 @@
 		(layers "*.Cu" "*.Mask")
 		(uuid "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
 	)
+	(model "${KIPRJMOD}/libs/redbearpad.3dshapes/TactSwitch 6x6.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )

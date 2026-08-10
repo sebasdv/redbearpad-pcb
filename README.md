@@ -118,12 +118,16 @@ abajo, X izquierda, B derecha**):
   generada con `scripts/gen_pinheader_1x14.py`): no está enlazada a ningún
   footprint propio del proyecto, pero **sí se usa** — está incrustada dos
   veces dentro de `BlendMicro_Module_V1.step` (una por fila de header).
-- **Pendiente:** modelo del tact CAX C39832249 (Start/Select). No hay STEP
-  disponible todavía.
+- **Tact Start/Select** (`SW_Tact_CAX_4.5x4.5`, ref `SW11`/`SW12`): modelo
+  genérico `libs/redbearpad.3dshapes/TactSwitch 6x6.step` (6×6×6 mm) — no es
+  el CAX C39832249 real (4.5×4.5 mm, sin STEP disponible), pero es
+  reconocible como tact switch y el usuario lo acepta como placeholder.
+  Cuerpo un poco más grande que el footprint (overhang leve sobre el
+  courtyard); offset/escala/rotación en cero, sin ajuste necesario.
 
-Ambos modelos ya adjuntos y visibles en `docs/render_*.png` y en el visor 3D de
-KiCad. Al regenerar con `gen_pcb.py` se colocan solos (viven en las librerías);
-si se rutea a mano sobre un board existente, usar `scripts/attach_3d_models.py`
+Todos los modelos ya adjuntos y visibles en `docs/render_*.png` y en el visor
+3D de KiCad. Al regenerar con `gen_pcb.py` se colocan solos (viven en las
+librerías); si se rutea a mano sobre un board existente, usar `scripts/attach_3d_models.py`
 (switches) o `scripts/insert_blendmicro_footprint.py` (Blend Micro) para no
 perder el ruteo.
 

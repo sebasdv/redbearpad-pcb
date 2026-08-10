@@ -2996,6 +2996,17 @@
 			(uuid "f08abb38-2efc-4202-a837-cd7d1bf8d115")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/TactSwitch 6x6.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "SW_Redragon_LowProfile_PCB_1.00u"
 		(layer "F.Cu")
@@ -3776,6 +3787,17 @@
 			(uuid "87c8a697-91c1-496c-9890-d0eb9a3f0535")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/libs/redbearpad.3dshapes/TactSwitch 6x6.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "BlendMicro_Module"
 		(layer "B.Cu")
